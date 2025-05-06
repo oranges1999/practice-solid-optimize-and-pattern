@@ -2,6 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { onMounted, ref } from 'vue'
+import { router } from '@inertiajs/vue3'
 import axios from 'axios'
 
 const users = ref(0)
@@ -18,12 +19,16 @@ const getUser = async (link) => {
 };
 
 const scrollToSection = () => {
-    scrollPosition.value.scrollIntoView({ behavior: 'smooth' }); // Cuộn mượt
+    scrollPosition.value.scrollIntoView({ behavior: 'smooth' });
 };
 
-onMounted(
+onMounted(()=>{
     getUser()
-)
+})
+
+const toEdit = () => {
+    router.visit(route('users.edit'))
+}
 </script>
 
 <template>
@@ -40,13 +45,14 @@ onMounted(
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                {{ users.last_page }}
                 <div ref="scrollPosition" class="example-pagination-block">
+                    <el-button type="primary" @click="toEdit()">Bulk Edit</el-button>
                     <table>
                         <thead>
                             <tr>
                                 <th>Name</th>
                                 <th>Email</th>
+                                <th>Type</th>
                                 <th>Description</th>
                             </tr>
                         </thead>
@@ -54,6 +60,7 @@ onMounted(
                             <tr v-for="user in users.data">
                                 <td>{{ user.name }}</td>
                                 <td>{{ user.email }}</td>
+                                <td>{{ user.type }}</td>
                                 <td>{{ user.description }}</td>
                             </tr>
                         </tbody>

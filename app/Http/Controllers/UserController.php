@@ -9,6 +9,11 @@ class UserController extends Controller
 {
     public function index()
     {
-        return inertia('User/UsersIndex');
+        return inertia('User/Index');
+    }
+
+    public function edit()
+    {
+        return inertia('User/Edit');
     }
 }

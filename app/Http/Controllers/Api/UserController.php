@@ -20,4 +20,14 @@ class UserController extends Controller
     {
         return $this->userService->getUser($request->all());
     }
+
+    public function massUpdate(Request $request)
+    {
+        try {
+            $this->userService->massUpdateUser($request->all());
+            return response()->json([], 200);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
 }

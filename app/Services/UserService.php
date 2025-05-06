@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use App\Repositories\User\UserRepositoryInterface;
 
 class UserService
@@ -19,5 +20,11 @@ class UserService
         $page = $data->page??0;
         $users = $this->userRepository->getAllUser($perPage, $page);
         return collect($users);
+    }
+
+    public function massUpdateUser($data)
+    {
+        $this->userRepository->massEditUser($data);
+        return 1;
     }
 }

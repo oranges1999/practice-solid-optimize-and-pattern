@@ -25,10 +25,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('users',[UserController::class, 'index'])->name('users.index');
+    Route::get('users/edit', [UserController::class, 'edit'])->name('users.edit');
 });
 
 Route::prefix('api')->as('api.')->middleware('auth')->group(function() {
     Route::get('/users', [ApiUserController::class, 'index'])->name('users.index');
+    Route::post('/users/update', [ApiUserController::class, 'massUpdate'])->name('users.mass-update');
 });
 
 require __DIR__.'/auth.php';
