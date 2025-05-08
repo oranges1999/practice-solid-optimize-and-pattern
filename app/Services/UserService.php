@@ -14,11 +14,11 @@ class UserService
         $this->userRepository = $userRepository;
     }
 
-    public function getUser($data)
+    public function getUser($data, $user)
     {  
         $perPage = $data->per_page??20;
         $page = $data->page??0;
-        $users = $this->userRepository->getAllUser($perPage, $page);
+        $users = $this->userRepository->getAllUser($perPage, $page, $user);
         return collect($users);
     }
 
@@ -32,5 +32,16 @@ class UserService
     {
         $this->userRepository->massDeleteUser($data);
         return 1;
+    }
+
+    public function updateSpecificUser($user, $data)
+    {
+        $this->userRepository->updateSpecificUser($user, $data);
+        return 1;
+    }
+
+    public function deleteSpecificUser($user)
+    {
+        $this->userRepository->deleteSpecificUser($user);
     }
 }

@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\MassUserUpdateRequest;
+use App\Http\Requests\UpdateSpecificUserRequest;
+use App\Models\User;
 use App\Repositories\User\UserRepository;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
@@ -19,27 +23,33 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        return $this->userService->getUser($request->all());
+        $currentUser = Auth::user();
+        return $this->userService->getUser($request->all(), $currentUser);
     }
 
-    public function massUpdate(Request $request)
+    public function massUpdate(MassUserUpdateRequest $request)
     {
-        try {
-            $this->userService->massUpdateUser($request->all());
-            return response()->json([], 200);
-        } catch (\Throwable $th) {
-            throw $th;
-        }
+        $this->userService->massUpdateUser($request->validated());
+        return response()->json([], 200);
     }
 
     public function massDelete(Request $request)
     {
-        DB::beginTransaction();
-        try{
-            $this->userService->massDeleteUser($request->all());
-            DB::commit();
-        } catch (\Throwable $th){
-            DB::rollback();
-        }
+        $this->userService->massDeleteUser($request->all());
+    }
+
+    public function getUserData(User $user)
+    {
+        return $user; 
+    }
+
+    public function updateSpecificUser(User $user, UpdateSpecificUserRequest $request)
+    {
+        $this->userService->updateSpecificUser($user, $request->validated());
+    }
+
+    public function deleteSpecificUser(User $user)
+    {
+        $this->userService->deleteSpecificUser($user);
     }
 }

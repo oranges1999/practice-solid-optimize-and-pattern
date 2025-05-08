@@ -16,4 +16,11 @@ class UserController extends Controller
     {
         return inertia('User/Edit');
     }
+
+    public function specificEdit(User $user)
+    {
+        return inertia('User/SpecificEdit', [
+            'user' => $user,
+        ]);
+    }
 }

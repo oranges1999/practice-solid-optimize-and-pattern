@@ -70,7 +70,7 @@ watch(
     }
 )
 
-const openPopup = () => {
+const openPopup1 = () => {
   ElMessageBox.confirm(
     'These user will be permanent remove. Continue?',
     'Warning',
@@ -80,9 +80,12 @@ const openPopup = () => {
       type: 'warning',
     }
   )
-    .then(() => {
+    .then(async () => {
         try { 
-            axios.post(route('api.users.mass-delete'), {userCheck: userCheck.value})
+            await axios.post(route('api.users.mass-delete'), {
+                userCheck: userCheck.value,
+                _method: 'delete'
+            })
             getUser()
             ElMessage({
                 type: 'success',
@@ -98,6 +101,45 @@ const openPopup = () => {
         message: 'Delete canceled',
       })
     })
+}
+
+const openPopup2 = (name, id) => {
+  ElMessageBox.confirm(
+    'User'+' '+name+' '+'will be permanent remove. Continue?',
+    'Warning',
+    {
+      confirmButtonText: 'OK',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    }
+  )
+    .then( async () => {
+        try { 
+            await axios.post(route('api.users.delete-specific', {user: id}), {
+                _method: 'delete'
+            })
+            getUser()
+            ElMessage({
+                type: 'success',
+                message: 'Delete completed',
+            })
+        } catch (error) {
+            ElMessage({
+                type: 'error',
+                message: 'Delete failed',
+            })
+        }
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: 'Delete canceled',
+      })
+    })
+}
+
+const toEditUser = (id) => {
+    router.visit(route('users.show', {user:id}))
 }
 </script>
 
@@ -117,7 +159,7 @@ const openPopup = () => {
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div ref="scrollPosition" class="example-pagination-block">
                     <el-button type="primary" @click="toEdit()">Bulk Edit</el-button>
-                    <el-button type="danger" @click="openPopup()">Bulk Delete</el-button>
+                    <el-button type="danger" @click="openPopup1()">Bulk Delete</el-button>
                     <table>
                         <thead>
                             <tr>
@@ -143,10 +185,10 @@ const openPopup = () => {
                                     <td>{{ user.type }}</td>
                                     <td>{{ user.description }}</td>
                                     <td>
-                                        <el-button type="primary">Edit</el-button>
+                                        <el-button type="primary" @click="toEditUser(user.id)">Edit</el-button>
                                     </td>
                                     <td>
-                                        <el-button type="danger">Delete</el-button>
+                                        <el-button type="danger" @click="openPopup2(user.name, user.id)">Delete</el-button>
                                     </td>
                                     <td>
                                         <el-checkbox-group v-model="userCheck[users.current_page]">
