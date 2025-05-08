@@ -27,4 +27,10 @@ class UserService
         $this->userRepository->massEditUser($data);
         return 1;
     }
+
+    public function massDeleteUser($data)
+    {
+        $this->userRepository->massDeleteUser($data);
+        return 1;
+    }
 }

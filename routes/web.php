@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
 Route::prefix('api')->as('api.')->middleware('auth')->group(function() {
     Route::get('/users', [ApiUserController::class, 'index'])->name('users.index');
     Route::post('/users/update', [ApiUserController::class, 'massUpdate'])->name('users.mass-update');
+    Route::post('/users/delete', [ApiUserController::class, 'massDelete'])->name('users.mass-delete');
 });
 
 require __DIR__.'/auth.php';

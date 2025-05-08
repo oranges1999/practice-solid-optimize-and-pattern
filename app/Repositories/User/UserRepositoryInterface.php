@@ -8,4 +8,5 @@ interface UserRepositoryInterface
 {
     public function getAllUser($perPage, $page);
     public function massEditUser($data);
+    public function massDeleteUser($data);
 }
