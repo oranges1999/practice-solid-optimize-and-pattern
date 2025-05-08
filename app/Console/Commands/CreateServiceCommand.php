@@ -43,7 +43,7 @@ class CreateServiceCommand extends Command
         if(!File::exists($filePath)){
             $content = "<?php\n\nnamespace App\\Services;\n\nclass $fileName\n{\n    // \n}\n";
             File::put($filePath, $content);
-            $this->info("Đã tạo file Interface: $fileName.php");
+            $this->info("$fileName.php created");
         }
     }
 }

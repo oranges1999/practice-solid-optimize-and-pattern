@@ -28,50 +28,50 @@ class CreateRepositoryCommand extends Command
     public function handle()
     {
         $rawName = $this->argument('name');
-        $name = Str::studly($rawName); // Ví dụ user → User
+        $name = Str::studly($rawName);
         $repositoriesRoot = app_path('Repositories');
 
-        // 1. Tạo folder Repositories nếu chưa có
+        // 1. Create Repositories folder if there's none
         if (!File::exists($repositoriesRoot)) {
             File::makeDirectory($repositoriesRoot, 0755, true);
-            $this->info('Đã tạo folder: app/Repositories');
+            $this->info('app/Repositories created');
         }
 
-        // 2. Tạo folder con
+        // 2. Create sub-folder
         $targetPath = $repositoriesRoot . '/' . $name;
         if (!File::exists($targetPath)) {
             File::makeDirectory($targetPath, 0755, true);
-            $this->info("Đã tạo folder: app/Repositories/$name");
+            $this->info("app/Repositories/$name created");
         }
 
-        // 3. Chuẩn bị file
+        // 3. Prepare the file
         $interfaceName = $name . 'RepositoryInterface';
         $repositoryName = $name . 'Repository';
         $interfacePath = $targetPath . '/' . $interfaceName . '.php';
         $repositoryPath = $targetPath . '/' . $repositoryName . '.php';
 
-        // 4. Tạo file Interface nếu chưa có
+        // 4. Create Interface
         if (!File::exists($interfacePath)) {
             $interfaceContent = "<?php\n\nnamespace App\Repositories\\$name;\n\ninterface $interfaceName\n{\n    // \n}\n";
             File::put($interfacePath, $interfaceContent);
-            $this->info("Đã tạo file Interface: $interfaceName.php");
+            $this->info("$interfaceName.php created");
         } else {
-            $this->warn("$interfaceName.php đã tồn tại, bỏ qua.");
+            $this->warn("$interfaceName.php is existed, skipping");
         }
 
-        // 5. Tạo file Repository nếu chưa có
+        // 5. Create repository
         if (!File::exists($repositoryPath)) {
             $repositoryContent = "<?php\n\nnamespace App\Repositories\\$name;\n\nclass $repositoryName implements $interfaceName\n{\n    // \n}\n";
             File::put($repositoryPath, $repositoryContent);
-            $this->info("Đã tạo file Repository: $repositoryName.php");
+            $this->info("$repositoryName.php created");
         } else {
-            $this->warn("$repositoryName.php đã tồn tại, bỏ qua.");
+            $this->warn("$repositoryName.php is existed, skipping");
         }
 
-        // 6. Tự động bind vào RepositoryServiceProvider 
+        // 6. Automatic binding 2 files
         $providerPath = app_path('Providers/RepositoryServiceProvider.php');
         if (!File::exists($providerPath)) {
-            $this->warn('Không tìm thấy RepositoryServiceProvider. Đang tạo...');
+            $this->warn('RepositoryServiceProvider is not found. Creating...');
             $this->call('make:provider', ['name' => 'RepositoryServiceProvider']);
         }
 
@@ -79,16 +79,16 @@ class CreateRepositoryCommand extends Command
         $repositoryFull = "App\\Repositories\\$name\\$repositoryName";
         $bindCode = "        \$this->app->bind(\\$interfaceFull::class, \\$repositoryFull::class);";
 
-        // Đọc nội dung provider
+        // Read provider content
         $providerContent = File::get($providerPath);
 
-        // Kiểm tra sự tồn tại của namespace Illuminate\Support\ServiceProvider
+        // Checking namespace
         if (!Str::contains($providerContent, 'use Illuminate\Support\ServiceProvider')) {
-            $this->error('RepositoryServiceProvider phải extend từ Illuminate\Support\ServiceProvider');
+            $this->error('RepositoryServiceProvider must extend from Illuminate\Support\ServiceProvider');
             return 1;
         }
 
-        // Nếu chưa có phương thức register(), thêm nguyên phương thức vào class
+        // Add register() method if thers's none
         if (!Str::contains($providerContent, 'public function register')) {
             $providerContent = preg_replace(
                 '/class RepositoryServiceProvider extends ServiceProvider\s*\{/',
@@ -97,24 +97,24 @@ class CreateRepositoryCommand extends Command
             );
         }
 
-        // Kiểm tra bind đã tồn tại chưa
+        // Checking if binding's existed
         if (!Str::contains($providerContent, $bindCode)) {
-            // Chèn bind vào trước dòng đóng của register()
+            // Inserting bind
             $pattern = '/(public function register\(\)(?:\s*:\s*void)?\s*\{)([\s\S]*?)(\n\s*\})/';
             $replacement = '$1$2' . "\n$bindCode$3";
             $providerContent = preg_replace($pattern, $replacement, $providerContent);
             
             if (File::put($providerPath, $providerContent)) {
-                $this->info('Đã bind vào RepositoryServiceProvider.');
+                $this->info('Repository binded.');
             } else {
-                $this->error('Không thể ghi vào file RepositoryServiceProvider.');
+                $this->error('RepositoryServiceProvider can not be written.');
                 return 1;
             }
         } else {
-            $this->warn('Bind đã tồn tại, bỏ qua.');
+            $this->warn('Binding exists, skipping...');
         }
 
-        $this->info('Hoàn thành 🎉');
+        $this->info('Finish🎉');
         return 0;
     }
 }
