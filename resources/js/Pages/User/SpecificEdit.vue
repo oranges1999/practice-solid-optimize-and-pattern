@@ -12,22 +12,39 @@ const props = defineProps({
     }
 })
 
-const formData = ref({})
-
 const formErrors = ref({})
 
 const submit = async () => {
-    formData.value = props.user
-    formData.value['_method'] = 'PUT'
+    const formData = new FormData()
+    formData.append('name', props.user.name)
+    formData.append('type', props.user.type)
+    formData.append('description', props.user.description)
+    if(avatar.value){
+        formData.append('avatar', avatar.value)
+    }
+    formData.append('_method', 'PUT')
     formErrors.value = {}
     try {
-        await axios.post(route('api.users.update-specific', {user:props.user.id}), formData.value)
+        await axios.post(route('api.users.update-specific', {user:props.user.id}), formData)
         ElMessage({
             message: 'Success',
             type: 'success',
         })
     } catch (error) {
         formErrors.value = error.response.data.errors
+    }
+} 
+
+const avatar = ref(null);
+const userAvatar = ref()
+const handleFile = (e) => {
+    if(e.target.files){
+        avatar.value = e.target.files[0]
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            props.user.avatar = e.target.result
+        }
+        reader.readAsDataURL(e.target.files[0])
     }
 }
 </script>
@@ -47,9 +64,10 @@ const submit = async () => {
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div ref="scrollPosition" class="example-pagination-block">
-                    <el-form :model="formData" label-width="auto" style="max-width: 600px">
+                    <el-form label-width="auto" style="max-width: 600px">
                         <el-form-item label="Avatar">
                             <el-image :src="user.avatar"></el-image>
+                            <input ref="userAvatar" type="file" @change="handleFile($event)">
                         </el-form-item>
                         <el-form-item label="Name" class="relative">
                             <el-input v-model="user.name" />

@@ -25,6 +25,7 @@ class UpdateSpecificUserRequest extends FormRequest
             'name' => 'required|string|max:10',
             'description' => 'required|string|max:255',
             'type' => 'required|integer|in:1,2',
+            'avatar' => 'sometimes|mimes:jpeg,png,jpg,gif,avif'
         ];
     }
 }
