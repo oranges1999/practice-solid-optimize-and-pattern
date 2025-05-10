@@ -20,11 +20,16 @@ class UserService
         $this->userRepository = $userRepository;
     }
 
-    public function getUser($data, $user)
+    public function getUser($data, $currentUser)
     {  
-        $users = $this
-            ->userRepository
-            ->getAllUser($this->perPage, $this->page, $user);
+        if($data){
+            $users = User::search($data)
+                ->whereNotIn('id', [$currentUser->id])
+                ->paginate($this->perPage, 'page', $this->page);
+        } else {
+            $users = $this->userRepository
+                ->getAllUser($this->perPage, $this->page, $currentUser);
+        }
         return collect($users);
     }
 

@@ -24,7 +24,8 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $currentUser = Auth::user();
-        return $this->userService->getUser($request->all(), $currentUser);
+        $users = $this->userService->getUser($request->key_word, $currentUser);
+        return response()->json($users, 200);
     }
 
     public function massUpdate(MassUserUpdateRequest $request)
@@ -33,23 +34,26 @@ class UserController extends Controller
         return response()->json([], 200);
     }
 
-    public function massDelete(Request $request)
+public function massDelete(Request $request)
     {
         $this->userService->massDeleteUser($request->all());
+        return response()->json([], 200);
     }
 
     public function getUserData(User $user)
     {
-        return $user; 
+        return response()->json($user, 200); 
     }
 
     public function updateSpecificUser(User $user, UpdateSpecificUserRequest $request)
     {
         $this->userService->updateSpecificUser($user, $request->validated());
+        return response()->json([], 200);
     }
 
     public function deleteSpecificUser(User $user)
     {
         $this->userService->deleteSpecificUser($user);
+        return response()->json([], 200);
     }
 }

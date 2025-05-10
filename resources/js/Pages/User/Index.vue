@@ -9,10 +9,15 @@ import { ElMessageBox, ElMessage } from 'element-plus';
 const users = ref(0)
 const userIds = ref([])
 const scrollPosition = ref(null)
+const keyWord = ref('')
 const getUser = async (link) => {
     link = link??route('api.users.index')
     try {
-        const data = await axios.get(link);
+        const data = await axios.get(link, {
+            params:{
+                key_word: keyWord.value
+            }
+        });
         users.value = data.data
         userIds.value = users.value.data.map((user)=>{
             return user.id
@@ -158,8 +163,16 @@ const toEditUser = (id) => {
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div ref="scrollPosition" class="example-pagination-block">
-                    <el-button type="primary" @click="toEdit()">Bulk Edit</el-button>
-                    <el-button type="danger" @click="openPopup1()">Bulk Delete</el-button>
+                    <div class="flex justify-between mb-[20px]">
+                        <div>
+                            <el-button type="primary" @click="toEdit()">Bulk Edit</el-button>
+                            <el-button type="danger" @click="openPopup1()">Bulk Delete</el-button>
+                        </div>
+                        <div class="flex gap-3">
+                            <el-input v-model="keyWord"/>
+                            <el-button type="primary" @click="getUser()">Search</el-button>
+                        </div>
+                    </div>
                     <table>
                         <thead>
                             <tr>
