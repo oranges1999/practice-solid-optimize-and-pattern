@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import { router } from '@inertiajs/vue3';
 import { ElMessage } from 'element-plus';
@@ -44,16 +44,41 @@ const submit = async () => {
 
 const avatar = ref(null);
 const userAvatar = ref()
-const handleFile = (e) => {
-    if(e.target.files){
-        form.value.avatar = e.target.files[0]
+const handleFile = (file) => {
+    if(file){
+        form.value.avatar = file
         const reader = new FileReader()
         reader.onload = (e) => {
             avatar.value = e.target.result
         }
-        reader.readAsDataURL(e.target.files[0])
+        reader.readAsDataURL(file)
     }
 }
+
+const deleteAvatar = () => {
+    if(form.value.avatar){
+        form.value.avatar = null
+        avatar.value = null
+    }
+}
+
+function preventDefaults(e) {
+    e.preventDefault()
+}
+
+const events = ['dragenter', 'dragover', 'dragleave', 'drop']
+
+onMounted(() => {
+    events.forEach((eventName) => {
+        document.body.addEventListener(eventName, preventDefaults)
+    })
+})
+
+onUnmounted(() => {
+    events.forEach((eventName) => {
+        document.body.removeEventListener(eventName, preventDefaults)
+    })
+})
 </script>
 
 <template>
@@ -73,8 +98,24 @@ const handleFile = (e) => {
                 <div ref="scrollPosition" class="example-pagination-block">
                     <el-form :model="form" label-width="auto" style="max-width: 600px">
                         <el-form-item label="Avatar">
-                            <el-image v-if="avatar" :src="avatar"></el-image>
-                            <input ref="userAvatar" type="file" @change="handleFile($event)">
+                            <div v-if="avatar" class="h-[400px] relative" :class="avatar ? 'w-auto' : 'w-[400px]'">
+                                <el-image :src="avatar" class="rounded-[30px] h-full w-auto"></el-image>
+                                <img 
+                                    src="/svgs/close.svg" 
+                                    alt="" 
+                                    class="absolute top-[20px] right-[20px] h-[20px] cursor-pointer" 
+                                    @click="deleteAvatar"
+                                >
+                            </div>
+                            <div 
+                                v-else 
+                                class="h-[400px] w-[400px] flex justify-center items-center border border-dashed border-[black] rounded-[30px] cursor-pointer" 
+                                @click="userAvatar.click()"
+                                @drop.prevent="handleFile($event.dataTransfer.files[0])"
+                            >
+                                <img src="/svgs/plus_circle.svg" alt="" class="h-[50px]">
+                            </div>
+                            <input v-show="false" ref="userAvatar" type="file" @change="handleFile($event.target.files[0])">
                         </el-form-item>
                         <el-form-item label="Name" class="relative">
                             <el-input v-model="form.name" />
