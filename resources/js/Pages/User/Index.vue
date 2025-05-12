@@ -9,14 +9,14 @@ import { ElMessageBox, ElMessage } from 'element-plus';
 const users = ref(0)
 const userIds = ref([])
 const scrollPosition = ref(null)
-const keyWord = ref('')
+const params = ref({
+    advance_search: false
+})
 const getUser = async (link) => {
     link = link??route('api.users.index')
     try {
         const data = await axios.get(link, {
-            params:{
-                key_word: keyWord.value
-            }
+            params:params.value
         });
         users.value = data.data
         userIds.value = users.value.data.map((user)=>{
@@ -146,6 +146,19 @@ const openPopup2 = (name, id) => {
 const toEditUser = (id) => {
     router.visit(route('users.show', {user:id}))
 }
+const toggleAdvanceSearch = () => {
+    if(params.value.advance_search){
+        params.value.advance_search = false
+        params.value.created_from = null
+        params.value.created_to = null
+    } else {
+        params.value.advance_search = true
+    }
+}
+
+const toCreateUser = () => {
+    router.visit(route('users.create'));
+}
 </script>
 
 <template>
@@ -163,14 +176,55 @@ const toEditUser = (id) => {
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div ref="scrollPosition" class="example-pagination-block">
-                    <div class="flex justify-between mb-[20px]">
-                        <div>
-                            <el-button type="primary" @click="toEdit()">Bulk Edit</el-button>
-                            <el-button type="danger" @click="openPopup1()">Bulk Delete</el-button>
+                    <div>
+                        <div class="flex justify-between mb-[20px]">
+                            <div>
+                                <el-button type="primary" @click="toEdit()">Bulk Edit</el-button>
+                                <el-button type="danger" @click="openPopup1()">Bulk Delete</el-button>
+                                <el-button type="success" @click="toCreateUser()">Create User</el-button>
+                            </div>
+                            <div>
+                                <div class="flex gap-3">
+                                    <el-input v-model="params.key_word"/>
+                                    <el-button type="primary" @click="getUser()">Search</el-button>
+                                </div>
+                                <div class="flex justify-end items-center" @click="toggleAdvanceSearch()">
+                                    <p class="text-right underline underline-offset-2 cursor-pointer">
+                                        Advance Search 
+                                    </p>
+                                    <img 
+                                        src="/svgs/arrow_left.svg" 
+                                        class="h-[30px] transition duration-100 ease-linear" 
+                                        :class="{'rotate-90-counter-clock':params.advance_search}" 
+                                        alt=""
+                                    >    
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex gap-3">
-                            <el-input v-model="keyWord"/>
-                            <el-button type="primary" @click="getUser()">Search</el-button>
+                        <div 
+                            class="flex gap-2 justify-center items-center overflow-y-hidden transition-height-300" 
+                            :style="params.advance_search ? 'height: 50px' : 'height: 0px'"
+                        >
+                            <el-form-item label="Created From" class="!m-0">
+                                <el-date-picker
+                                    v-model="params.created_from"
+                                    type="date"
+                                    placeholder="Pick a day"
+                                    :size="small"
+                                    format="YYYY-MM-DD"
+                                    value-format="YYYY-MM-DD"
+                                />
+                            </el-form-item>
+                            <el-form-item label="Created To" class="!m-0">
+                                <el-date-picker
+                                    v-model="params.created_to"
+                                    type="date"
+                                    placeholder="Pick a day"
+                                    :size="small"
+                                    format="YYYY-MM-DD"
+                                    value-format="YYYY-MM-DD"
+                                />
+                            </el-form-item>
                         </div>
                     </div>
                     <table>
@@ -223,3 +277,16 @@ const toEditUser = (id) => {
         </div>
     </AuthenticatedLayout>
 </template>
+<style scoped>
+.close-nav-btn{
+    transition: linear 0.1s;
+}
+
+.rotate-90-counter-clock{
+    transform: rotateZ(-90deg);
+}
+
+.transition-height-300{
+    transition: height 0.3s;
+}
+</style>

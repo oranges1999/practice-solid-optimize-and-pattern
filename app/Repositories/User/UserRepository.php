@@ -7,10 +7,21 @@ use Illuminate\Support\Facades\DB;
 
 class UserRepository implements UserRepositoryInterface
 {
-    public function getAllUser($perPage, $page, $user)
+    public function getAllUser($data, $user, $perPage = 20, $page = 0)
     {
-        return User::where('id', '!=', $user->id)
-            ->paginate($perPage, ['*'], 'page', $page);
+        $query = User::where('id', '!=', $user->id);
+        if($data['advance_search']){
+            if(array_key_exists('created_from', $data) && $data['created_from']){
+                $query = $this->filterByCreatedAt($data['created_from'], null, $query);
+            }
+            if(array_key_exists('created_to', $data) && $data['created_to']){
+                $query = $this->filterByCreatedAt(null, $data['created_to'], $query);
+            }
+        }
+        if(array_key_exists('key_word', $data) && $data['key_word']){
+            $query = $this->filterByKeyword($data['key_word'], $query);
+        }
+        return $query->paginate($perPage, ['*'], 'page', $page);
     }
 
     public function massEditUser($data)
@@ -76,5 +87,37 @@ class UserRepository implements UserRepositoryInterface
         } catch (\Throwable $th) {
             DB::rollBack();
         }
+    }
+
+    public function createUser($data)
+    {
+        DB::beginTransaction();
+        try {
+            $user = User::create($data);
+            DB::commit();
+            return $user;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+
+    private function filterByKeyword($keyWord, $query)
+    {
+        return $query->where(function($q) use ($keyWord){
+            $q->whereLike('name', "%$keyWord%")
+            ->orWhereLike('email', "%$keyWord%")
+            ->orWhereLike('description', "%$keyWord%"); 
+        });
+    }
+
+    private function filterByCreatedAt($createdFrom = null, $createdTo = null, $query)
+    {
+        return $query->when($createdFrom, function($q) use ($createdFrom){
+                $q->where('created_at', '>=', $createdFrom);
+            })
+            ->when($createdTo, function($q) use ($createdTo){
+                $q->where('created_at', '<=', $createdTo);
+            });
     }
 }

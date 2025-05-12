@@ -27,6 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::get('users',[UserController::class, 'index'])->name('users.index');
     Route::get('users/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::get('users/{user}', [UserController::class, 'specificEdit'])->name('users.show');
+    Route::get('user/create', [UserController::class, 'create'])->name('users.create');
 });
 
 Route::prefix('api')->as('api.')->middleware('auth')->group(function() {
@@ -36,6 +37,7 @@ Route::prefix('api')->as('api.')->middleware('auth')->group(function() {
     Route::get('/users/{user}', [ApiUserController::class, 'getUserData'])->name('users.show');
     Route::put('/users/{user}/update', [ApiUserController::class, 'updateSpecificUser'])->name('users.update-specific');
     Route::delete('/users/{user}/delete', [ApiUserController::class, 'deleteSpecificUser'])->name('users.delete-specific');
+    Route::post('/users/create', [ApiUserController::class, 'createUser'])->name('users.create-user');
 });
 
 require __DIR__.'/auth.php';

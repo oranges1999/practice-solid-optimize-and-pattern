@@ -49,4 +49,13 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function toSearchableArray()
+    {
+        $array = $this->toArray();
+
+        $array['created_at'] = strtotime($this->created_at); // convert thành Unix timestamp
+
+        return $array;
+    }
 }

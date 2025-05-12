@@ -11,10 +11,6 @@ class UserService
 {
     private $userRepository;
 
-    private $page = 0;
-
-    private $perPage = 20;
-
     public function __construct(UserRepositoryInterface $userRepository)
     {
         $this->userRepository = $userRepository;
@@ -22,15 +18,74 @@ class UserService
 
     public function getUser($data, $currentUser)
     {  
-        if($data){
-            $users = User::search($data)
-                ->whereNotIn('id', [$currentUser->id])
-                ->paginate($this->perPage, 'page', $this->page);
-        } else {
-            $users = $this->userRepository
-                ->getAllUser($this->perPage, $this->page, $currentUser);
-        }
+        $users = $this->userRepository->getAllUser($data, $currentUser);
         return collect($users);
+
+        /**
+         * 
+         * REMOVE MEILISEARCH
+         * 
+         */
+
+        // if (!empty($data['key_word'])) {
+        //     $query = User::search($data['key_word']);
+        //     $filters = [];
+        //     if (!empty($data['advance_search'])) {
+        //         if (!empty($data['created_from'])) {
+        //             $timestampFrom = strtotime($data['created_from']);
+        //             $filters[] = 'created_at >= ' . $timestampFrom;
+        //         }
+        //         if (!empty($data['created_to'])) {
+        //             $timestampTo = strtotime($data['created_to']);
+        //             $filters[] = 'created_at <= ' . $timestampTo;
+        //         }
+        //     }
+        //     if (!empty($filters)) {
+        //         $query->filter(implode(' AND ', $filters));
+        //     }
+        //     $users = $query->paginate($this->perPage, 'page', (int)$this->page);
+        // } else {
+        //     $users = User::where('id', '!=', $currentUser->id)
+        //         ->paginate($this->perPage, ['*'], 'page', $this->page);
+        // }
+        // if(array_key_exists('key_word', $data) && $data['key_word']){
+        //     $query = User::search($data['key_word']);
+        //     if($data['advance_search']){
+        //         if(array_key_exists('created_from', $data) && $data['created_from']){
+        //             $timeStampFrom = strtotime($data['created_from']);
+        //             $filters[] = 'created_at > '.$timeStampFrom;
+        //         }
+        //         if(array_key_exists('created_to', $data) && $data['created_to']){
+        //             $timeStampTo = strtotime($data['created_to']);
+        //             $filters[] = 'created_at < '.$timeStampTo;
+        //         }
+        //         if(!empty($filters)){
+        //             $query->filter(implode(' AND ', $filters));
+        //         }
+        //         $users = $query->paginate($this->perPage, 'page', $this->page);
+        //     }
+        // } else {
+        //     $users = User::where('id', '!=', $currentUser->id)
+        //         ->paginate($this->perPage, ['*'], 'page', $this->page);
+        // }
+        // $query = User::whereNotIn('id', [$currentUser->id]);;
+        // if(array_key_exists('key_word', $data) && $data['key_word']){
+        //     $query = $this->searchByKeyWord($data['key_word'], $query);
+        // }
+        // if($data['advance_search'] == true){
+        //     if(array_key_exists('created_from', $data) && $data['created_from']){
+        //         $query = $this->filterByCreateFrom($data['created_from'], $query);
+        //     }
+        //     if(array_key_exists('created_to', $data) && $data['created_to']){
+        //         $query = $this->filterByCreateTo($data['created_to'], $query);
+        //     }
+        // }
+        // $users = $query->paginate(
+        //     $this->perPage,  // $perPage
+        //     ['*'],           // $columns
+        //     'page',          // $pageName
+        //     $this->page      // $page
+        // );
     }
 
     public function massUpdateUser($data)
@@ -66,5 +121,19 @@ class UserService
     {
         $this->userRepository
             ->deleteSpecificUser($user);
+        return 1;
+    }
+
+    public function createNewUser($data)
+    {
+        try {
+            if(array_key_exists('avatar', $data) && $data['avatar']){
+                $path = storeFile('avatar', $data['avatar']);
+                $data['avatar'] = getFileUrl($path);
+            }
+            return $this->userRepository->createUser($data);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 }

@@ -141,7 +141,7 @@ return [
         'key' => env('MEILISEARCH_KEY'),
         'index-settings' => [
             'users' => [
-                'filterableAttributes'=> ['id', 'name', 'email'],
+                'filterableAttributes'=> ['id', 'name', 'email', 'created_at'],
             ],
         ],
     ],

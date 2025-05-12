@@ -23,4 +23,9 @@ class UserController extends Controller
             'user' => $user,
         ]);
     }
+
+    public function create()
+    {
+        return inertia('User/Create');
+    }
 }

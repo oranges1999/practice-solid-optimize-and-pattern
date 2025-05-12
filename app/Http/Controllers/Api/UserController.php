@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassUserUpdateRequest;
 use App\Http\Requests\UpdateSpecificUserRequest;
+use App\Http\Requests\UserCreateRequest;
 use App\Models\User;
 use App\Repositories\User\UserRepository;
 use App\Services\UserService;
@@ -24,7 +25,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $currentUser = Auth::user();
-        $users = $this->userService->getUser($request->key_word, $currentUser);
+        $users = $this->userService->getUser($request->all(), $currentUser);
         return response()->json($users, 200);
     }
 
@@ -34,7 +35,7 @@ class UserController extends Controller
         return response()->json([], 200);
     }
 
-public function massDelete(Request $request)
+    public function massDelete(Request $request)
     {
         $this->userService->massDeleteUser($request->all());
         return response()->json([], 200);
@@ -55,5 +56,11 @@ public function massDelete(Request $request)
     {
         $this->userService->deleteSpecificUser($user);
         return response()->json([], 200);
+    }
+
+    public function createUser(UserCreateRequest $request)
+    {
+        $user = $this->userService->createNewUser($request->validated());
+        return response()->json(['user' => $user]);
     }
 }
