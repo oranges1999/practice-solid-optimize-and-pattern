@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::get('users/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::get('users/create', [UserController::class, 'create'])->name('users.create');
     Route::get('users/import', [UserController::class, 'import'])->name('users.import');
+    Route::get('users/download-sample', [UserController::class, 'downloadSampleFile'])->name('users.download-sample');
     Route::get('users/{user}', [UserController::class, 'specificEdit'])->name('users.show');
 
 });

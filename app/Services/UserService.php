@@ -3,12 +3,19 @@
 namespace App\Services;
 
 use App\Enums\AppConst;
+use App\Http\Requests\ImportUserRequest;
+use App\Http\Requests\UserCreateRequest;
 use App\Models\User;
 use App\Repositories\User\UserRepositoryInterface;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class UserService
 {
@@ -158,24 +165,77 @@ class UserService
 
     public function import($data)
     {
-        DB::beginTransaction();
+        $isError = false;
+        $header = ['Name', 'Email', 'Description', 'Type'];
+        $fileContent = [$header,];
+        $users = json_decode($data['user']);
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
         try {
-            foreach ($data as $user) {
-                $this->userRepository->createUser([
-                    'name' => $user[0],
-                    'email' => $user[1],
-                    'description' => $user[2],
-                    'type' => $user[3],
-                    'avatar' => AppConst::DEFAULT_AVATAR,
-                    'password' => '123456789',
-                ]);
+            foreach ($users as $key => $user) {
+                if($key == 0) continue;
+                $rules = (new ImportUserRequest())->rules();
+                $userData = $this->sampleData($user);
+                $validator = Validator::make($userData, $rules);
+                if(!$validator->fails()){
+                    $this->userRepository->createUser($userData);
+                } else {
+                    $isError = true;
+                    $user[] = trim($this->formatValidateMessage($validator));
+                    $fileContent[] = $user;
+                }
             }
-            DB::commit();
-            return true;
+            if($isError){
+                $fullPath = $this->exportErrorFile($fileContent, $sheet, $spreadsheet);
+                return $fullPath;
+            } else {
+                return null;
+            }
         } catch (\Throwable $th) {
-            DB::rollback();
             throw $th;
             return false;
         }
+    }
+
+    public function getSampleFilePath()
+    {
+        return public_path('/sample/sample_file.xlsx');
+    }
+
+    private function exportErrorFile($fileContent, $sheet, $spreadsheet)
+    {
+        $userId = Auth::user()->id;
+        $fullPath = storage_path('app/public/temp/'.$userId.'/error_file.xlsx');
+        $row = 1;
+        foreach ($fileContent as $record) {
+            $sheet->fromArray($record, NULL, 'A' . $row++);
+        }
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($fullPath);
+        
+        return $fullPath;
+    }
+
+    private function sampleData($user)
+    {
+        return [
+            'name' => $user[0],
+            'email' => $user[1],
+            'description' => $user[2],
+            'type' => $user[3],
+            'avatar' => AppConst::DEFAULT_AVATAR->value,
+            'password' => '123456789',
+        ];
+    }
+
+    private function formatValidateMessage($validator)
+    {
+        $errorContent = '';
+        foreach ($validator->errors()->toArray() as $value) {
+            foreach($value as $error){
+                $errorContent .= "$error\n";
+            }
+        }
+        return $errorContent;
     }
 }

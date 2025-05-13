@@ -163,6 +163,16 @@ const toCreateUser = () => {
 const toImport = () => {
     router.visit(route('users.import'));
 }
+
+const toExport = (url) => {
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', 'import_error.xlsx')
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+}
 </script>
 
 <template>
@@ -187,6 +197,7 @@ const toImport = () => {
                                 <el-button type="danger" @click="openPopup1()">Bulk Delete</el-button>
                                 <el-button type="success" @click="toCreateUser()">Create User</el-button>
                                 <el-button type="info" @click="toImport()">Import User</el-button>
+                                <el-button type="warning" @click="toExport(route(''))">Export User</el-button>
                             </div>
                             <div>
                                 <div class="flex gap-3">

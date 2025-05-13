@@ -72,9 +72,10 @@ class UserController extends Controller
     }
 
     public function importData(Request $request)
-    {   $data = $request->all()['data'];
-        array_shift($data);
-        $code = $this->userService->import($data) ? 200 : 500;
-        return response()->json([], $code);
+    {   
+        $path = $this->userService->import($request->all());
+        return $path
+            ? response()->download($path, 'import_error.xlsx')->deleteFileAfterSend()
+            : response()->json([], 200);
     }
 }

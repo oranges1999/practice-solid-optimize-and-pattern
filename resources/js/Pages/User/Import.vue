@@ -5,6 +5,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import axios from 'axios'
 import { router } from '@inertiajs/vue3';
 import { ElMessage } from 'element-plus';
+import { Link } from '@inertiajs/vue3';
 
 const formErrors = ref({})
 const inputFile = ref()
@@ -46,11 +47,51 @@ const uploadFile = async (e) => {
 
 const importData = async () => {
     try {
-        await axios.post(route('api.users.import-user'), {data: fileData.value})
-        router.visit(route('users.index'));
+        let formData = new FormData()
+        console.log(fileData.value)
+        formData.append('user', JSON.stringify(fileData.value))
+        formData.append('file', input.value.files[0])
+        const response = await axios.post(route('api.users.import-user'), formData, {
+            responseType: 'blob',
+        })
+         const contentType = response.headers['content-type']
+        if (
+            contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') ||
+            contentType.includes('application/octet-stream')
+            ) {
+            const blob = new Blob([response.data], { type: contentType })
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', 'import_error.xlsx')
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+            URL.revokeObjectURL(url)
+            ElMessage({
+                message: 'There is something wrong with the data in the file, please check the result file which will be automatic downloaded to your computer in the seccond',
+                type: 'error',
+            })
+        } else {
+            const reader = new FileReader()
+            reader.onload = () => {
+                try {
+                    const json = JSON.parse(reader.result)
+                    console.log('Import thành công:', json)
+                } catch (e) {
+                    console.log('Phản hồi không phải JSON:', reader.result)
+                }
+            }
+            reader.readAsText(response.data)
+            router.visit(route('users.index'));
+        }
     } catch (error) {
         console.log(error)
-    }
+    }   
+}
+
+const downloadSample = () => {
+    router.visit(route('users.download-sample'))
 }
 
 function preventDefaults(e) {
@@ -103,6 +144,7 @@ const deleteFile = () => {
                         </div>
                         <input v-show="false" ref="inputFile" type="file" @change="uploadFile($event)">
                         <el-button type="primary" :disabled="!isUploading" :loading="isLoading" @click="importData">Import</el-button>
+                        <a :href="route('users.download-sample')">Download sample</a>
                     </div>
                     <div v-if="fileData">
                         <table>

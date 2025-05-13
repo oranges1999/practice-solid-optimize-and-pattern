@@ -98,7 +98,6 @@ class UserRepository implements UserRepositoryInterface
             return $user;
         } catch (\Throwable $th) {
             DB::rollBack();
-            throw $th;
         }
     }
 
