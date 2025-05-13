@@ -159,6 +159,10 @@ const toggleAdvanceSearch = () => {
 const toCreateUser = () => {
     router.visit(route('users.create'));
 }
+
+const toImport = () => {
+    router.visit(route('users.import'));
+}
 </script>
 
 <template>
@@ -182,6 +186,7 @@ const toCreateUser = () => {
                                 <el-button type="primary" @click="toEdit()">Bulk Edit</el-button>
                                 <el-button type="danger" @click="openPopup1()">Bulk Delete</el-button>
                                 <el-button type="success" @click="toCreateUser()">Create User</el-button>
+                                <el-button type="info" @click="toImport()">Import User</el-button>
                             </div>
                             <div>
                                 <div class="flex gap-3">

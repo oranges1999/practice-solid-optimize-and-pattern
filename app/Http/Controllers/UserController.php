@@ -28,4 +28,9 @@ class UserController extends Controller
     {
         return inertia('User/Create');
     }
+
+    public function import()
+    {
+        return inertia('User/Import');
+    }
 }

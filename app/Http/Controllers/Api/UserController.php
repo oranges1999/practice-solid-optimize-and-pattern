@@ -12,6 +12,7 @@ use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class UserController extends Controller
 {
@@ -62,5 +63,18 @@ class UserController extends Controller
     {
         $user = $this->userService->createNewUser($request->validated());
         return response()->json(['user' => $user]);
+    }
+
+    public function loadingUserFromFile(Request $request)
+    {
+        $data = $this->userService->loadUserFromFile($request->file('file'));
+        return response()->json($data);
+    }
+
+    public function importData(Request $request)
+    {   $data = $request->all()['data'];
+        array_shift($data);
+        $code = $this->userService->import($data) ? 200 : 500;
+        return response()->json([], $code);
     }
 }

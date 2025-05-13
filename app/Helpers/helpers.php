@@ -30,3 +30,14 @@ if(!function_exists('getFileUrl')){
         return env('AWS_URL') . '/' . $path;
     }
 }
+
+if(!function_exists('deleteFile')){
+    function deleteFile($path)
+    {
+        try {
+            Storage::delete($path);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+}

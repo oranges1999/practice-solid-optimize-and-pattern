@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Enums\AppConst;
 use App\Models\User;
 use App\Repositories\User\UserRepositoryInterface;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class UserService
 {
@@ -134,6 +137,45 @@ class UserService
             return $this->userRepository->createUser($data);
         } catch (\Throwable $th) {
             throw $th;
+        }
+    }
+
+    public function loadUserFromFile($file)
+    {
+        $path = $file->getRealPath();
+        $spreadsheet = IOFactory::load($path);
+        $sheet = $spreadsheet->getActiveSheet();
+        return array_filter($sheet->toArray(), function($data){
+            foreach($data as $field){
+                if(trim($field) != ''){
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+    }
+
+    public function import($data)
+    {
+        DB::beginTransaction();
+        try {
+            foreach ($data as $user) {
+                $this->userRepository->createUser([
+                    'name' => $user[0],
+                    'email' => $user[1],
+                    'description' => $user[2],
+                    'type' => $user[3],
+                    'avatar' => AppConst::DEFAULT_AVATAR,
+                    'password' => '123456789',
+                ]);
+            }
+            DB::commit();
+            return true;
+        } catch (\Throwable $th) {
+            DB::rollback();
+            throw $th;
+            return false;
         }
     }
 }

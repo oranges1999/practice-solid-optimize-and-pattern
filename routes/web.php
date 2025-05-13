@@ -26,18 +26,22 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('users',[UserController::class, 'index'])->name('users.index');
     Route::get('users/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::get('users/create', [UserController::class, 'create'])->name('users.create');
+    Route::get('users/import', [UserController::class, 'import'])->name('users.import');
     Route::get('users/{user}', [UserController::class, 'specificEdit'])->name('users.show');
-    Route::get('user/create', [UserController::class, 'create'])->name('users.create');
+
 });
 
 Route::prefix('api')->as('api.')->middleware('auth')->group(function() {
     Route::get('/users', [ApiUserController::class, 'index'])->name('users.index');
     Route::patch('/users/update', [ApiUserController::class, 'massUpdate'])->name('users.mass-update');
     Route::delete('/users/delete', [ApiUserController::class, 'massDelete'])->name('users.mass-delete');
+    Route::post('/users/create', [ApiUserController::class, 'createUser'])->name('users.create-user');
+    Route::post('/users/load-user', [ApiUserController::class, 'loadingUserFromFile'])->name('users.load-user');
+    Route::post('/users/import-user', [ApiUserController::class, 'importData'])->name('users.import-user');
     Route::get('/users/{user}', [ApiUserController::class, 'getUserData'])->name('users.show');
     Route::put('/users/{user}/update', [ApiUserController::class, 'updateSpecificUser'])->name('users.update-specific');
     Route::delete('/users/{user}/delete', [ApiUserController::class, 'deleteSpecificUser'])->name('users.delete-specific');
-    Route::post('/users/create', [ApiUserController::class, 'createUser'])->name('users.create-user');
 });
 
 require __DIR__.'/auth.php';
