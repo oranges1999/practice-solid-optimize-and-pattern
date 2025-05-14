@@ -22,7 +22,7 @@ const getUser = async (link) => {
         userIds.value = users.value.data.map((user)=>{
             return user.id
         })
-        userCheck.value[users.value.current_page]=userCheck.value[users.value.current_page]??[]
+        userCheck.value = userCheck.value ?? []
         scrollToSection()
     } catch (error) {
         console.log(error);
@@ -48,10 +48,30 @@ const isIndeterminate = ref(false)
 
 const handleCheckAll = () => {
     isIndeterminate.value = false
-    if(userCheck.value[users.value.current_page].length == 20 && userCheck.value[users.value.current_page]){
-        userCheck.value[users.value.current_page] = []
-    } else {
-        userCheck.value[users.value.current_page] = userIds.value
+    let filterUserIds = userCheck.value.filter((id) => {
+        return userIds.value.includes(id)
+    })
+    if(filterUserIds.length == 0){
+        userCheck.value = [
+            ...userCheck.value,
+            ...userIds.value
+        ]
+    }
+    if(filterUserIds.length > 0 && filterUserIds.length < userIds.value.length){
+        let pushUserIds = userIds.value.filter((id) => {
+            return !filterUserIds.includes(id)
+        })
+        userCheck.value = [
+            ...userCheck.value,
+            ...pushUserIds
+        ]
+    }
+    if(filterUserIds.length == userIds.value.length){
+        filterUserIds.forEach((id) => {
+            userCheck.value = userCheck.value.filter((item) => {
+                return item !== id
+            })
+        })
     }
 }
 
@@ -60,17 +80,25 @@ const compareArray = (array1, array2) => {
 }
 
 watch(
-    () => userCheck.value[users.value.current_page],
-    (newVal) => {
-        if(newVal.length == 0 || !newVal){
-            isIndeterminate.value = false
-            checkAll.value = false
-        } else if (newVal.length > 0 && newVal.length < 20) {
-            isIndeterminate.value = true
-            checkAll.value = false
-        } else if(compareArray(userIds.value, newVal)){
-            isIndeterminate.value = false
-            checkAll.value = true
+    () => [userCheck.value, userIds.value],
+    () => {
+        let filterUserCheckIds = userIds.value.filter((id) => {
+            return userCheck.value.includes(id)
+        })
+        let filterUserIds = userCheck.value.filter((id) => {
+            return userIds.value.includes(id)
+        })
+        if(filterUserCheckIds.length >= 0 && filterUserIds.length == 0){
+            isIndeterminate.value = false;
+            checkAll.value = false;
+        }
+        if(filterUserCheckIds.length > 0 && filterUserIds.length > 0 && filterUserIds.length < userIds.value.length ){
+            isIndeterminate.value = true;
+            checkAll.value = false;
+        }
+        if(filterUserCheckIds.length > 0 && filterUserIds.length == userIds.value.length){
+            isIndeterminate.value = false;
+            checkAll.value = true;
         }
     }
 )
@@ -226,7 +254,6 @@ const toExport = (url) => {
                                     v-model="params.created_from"
                                     type="date"
                                     placeholder="Pick a day"
-                                    :size="small"
                                     format="YYYY-MM-DD"
                                     value-format="YYYY-MM-DD"
                                 />
@@ -236,7 +263,6 @@ const toExport = (url) => {
                                     v-model="params.created_to"
                                     type="date"
                                     placeholder="Pick a day"
-                                    :size="small"
                                     format="YYYY-MM-DD"
                                     value-format="YYYY-MM-DD"
                                 />
@@ -274,7 +300,7 @@ const toExport = (url) => {
                                         <el-button type="danger" @click="openPopup2(user.name, user.id)">Delete</el-button>
                                     </td>
                                     <td>
-                                        <el-checkbox-group v-model="userCheck[users.current_page]">
+                                        <el-checkbox-group v-model="userCheck">
                                             <el-checkbox :value="user.id" />
                                         </el-checkbox-group>
                                     </td>
