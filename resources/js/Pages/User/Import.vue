@@ -29,20 +29,22 @@ const minLength = ref(0)
 
 const uploadFile = async (e) => {
     isLoading.value = true
-    const formData = new FormData()
     input.value = e.target
-    formData.append('file', e.target.files[0])
-    try {
-        const data = await axios.post(route('api.users.load-user'), formData)
-        fileData.value = data.data
-        minLength.value = fileData.value.length > 10 ? 5 : fileData.value.length
-        fileName.value = e.target.files[0].name
-        isLoading.value = false
-    } catch (error) {
-        isLoading.value = false
-        console.log(error)
-        deleteFile()
-    }
+    fileName.value = e.target.files[0].name
+    isLoading.value = false
+
+    // formData.append('file', e.target.files[0])
+    // try {
+    //     const data = await axios.post(route('api.users.load-user'), formData)
+    //     fileData.value = data.data
+    //     minLength.value = fileData.value.length > 10 ? 5 : fileData.value.length
+    //     fileName.value = e.target.files[0].name
+    //     isLoading.value = false
+    // } catch (error) {
+    //     isLoading.value = false
+    //     console.log(error)
+    //     deleteFile()
+    // }
 }
 
 const importData = async () => {
@@ -143,8 +145,12 @@ const deleteFile = () => {
                             </div>
                         </div>
                         <input v-show="false" ref="inputFile" type="file" @change="uploadFile($event)">
-                        <el-button type="primary" :disabled="!isUploading" :loading="isLoading" @click="importData">Import</el-button>
+                        <el-button type="primary" :disabled="!fileName" :loading="isLoading" @click="importData">Import</el-button>
                         <a :href="route('users.download-sample')">Download sample</a>
+                    </div>
+                    <div class="flex">
+                        <i class="text-[red] mr-[5px]">*</i>
+                        <p class="underline underline-offset-2">Maximum 5000 row of data at once</p>
                     </div>
                     <div v-if="fileData">
                         <table>

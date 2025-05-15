@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\Enums\AppConst;
+use App\Enums\UserTypeExportEnum;
 use App\Http\Requests\ImportUserRequest;
 use App\Http\Requests\UserCreateRequest;
+use App\Jobs\ExportUsersToXlsx;
+use App\Jobs\ImportExcelJob;
 use App\Models\User;
 use App\Repositories\User\UserRepositoryInterface;
 use Illuminate\Support\Facades\Request;
@@ -14,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx as ReaderXlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -119,6 +123,9 @@ class UserService
                 $path = storeFile("avatars/$user->id", $data['avatar']);
                 $data['avatar'] = getFileUrl($path);
             }
+            if($user->avatar && Storage::disk('s3')->exists(getFilePath($user->avatar))){
+                deleteFile('s3', getFilePath($user->avatar));
+            }
             $this->userRepository->updateSpecificUser($user, $data);
             return 1;
         } catch (\Throwable $th) {
@@ -138,63 +145,26 @@ class UserService
     {
         try {
             if(array_key_exists('avatar', $data) && $data['avatar']){
-                $path = storeFile('avatar', $data['avatar']);
-                $data['avatar'] = getFileUrl($path);
+                $image = array_pop($data);
             }
-            return $this->userRepository->createUser($data);
+            $user = $this->userRepository->createUser($data);
+            if($image){
+                $path = storeFile('avatars/'.$user->id, $image);
+                $avatar = getFileUrl($path);
+                $this->updateSpecificUser($user, ['avatar' => $avatar]);
+            }
+            return $user->refresh();
         } catch (\Throwable $th) {
             throw $th;
         }
-    }
-
-    public function loadUserFromFile($file)
-    {
-        $path = $file->getRealPath();
-        $spreadsheet = IOFactory::load($path);
-        $sheet = $spreadsheet->getActiveSheet();
-        return array_filter($sheet->toArray(), function($data){
-            foreach($data as $field){
-                if(trim($field) != ''){
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        });
     }
 
     public function import($data)
     {
-        $isError = false;
-        $header = ['Name', 'Email', 'Description', 'Type'];
-        $fileContent = [$header,];
-        $users = json_decode($data['user']);
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        try {
-            foreach ($users as $key => $user) {
-                if($key == 0) continue;
-                $rules = (new ImportUserRequest())->rules();
-                $userData = $this->sampleData($user);
-                $validator = Validator::make($userData, $rules);
-                if(!$validator->fails()){
-                    $this->userRepository->createUser($userData);
-                } else {
-                    $isError = true;
-                    $user[] = trim($this->formatValidateMessage($validator));
-                    $fileContent[] = $user;
-                }
-            }
-            if($isError){
-                $fullPath = $this->exportErrorFile($fileContent, $sheet, $spreadsheet);
-                return $fullPath;
-            } else {
-                return null;
-            }
-        } catch (\Throwable $th) {
-            throw $th;
-            return false;
-        }
+        $currentUser = Auth::user();
+        $path = Storage::disk('public')
+            ->putFileAs('Imports',$data['file'],uniqid().'_'.$data['file']->getClientOriginalName());
+        ImportExcelJob::dispatch($currentUser, $path);
     }
 
     public function getSampleFilePath()
@@ -202,40 +172,9 @@ class UserService
         return public_path('/sample/sample_file.xlsx');
     }
 
-    private function exportErrorFile($fileContent, $sheet, $spreadsheet)
-    {
-        $userId = Auth::user()->id;
-        $fullPath = storage_path('app/public/temp/'.$userId.'/error_file.xlsx');
-        $row = 1;
-        foreach ($fileContent as $record) {
-            $sheet->fromArray($record, NULL, 'A' . $row++);
-        }
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($fullPath);
-        
-        return $fullPath;
-    }
-
-    private function sampleData($user)
-    {
-        return [
-            'name' => $user[0],
-            'email' => $user[1],
-            'description' => $user[2],
-            'type' => $user[3],
-            'avatar' => AppConst::DEFAULT_AVATAR->value,
-            'password' => '123456789',
-        ];
-    }
-
-    private function formatValidateMessage($validator)
-    {
-        $errorContent = '';
-        foreach ($validator->errors()->toArray() as $value) {
-            foreach($value as $error){
-                $errorContent .= "$error\n";
-            }
-        }
-        return $errorContent;
+    public function exportUsers($userType, $exportType, $userIds)
+    {   
+        $currentUser = Auth::user();
+        ExportUsersToXlsx::dispatch($currentUser, $userType, $exportType, $userIds);
     }
 }

@@ -54,12 +54,7 @@ class UserRepository implements UserRepositoryInterface
     {
         DB::beginTransaction();
         try {
-            $userIds = [];
-            foreach($data['userCheck'] as $key => $userIdsPage){
-                if($userIdsPage == null || $userIdsPage == []) continue;
-                $userIds = array_merge($userIds, $userIdsPage);
-            }
-            User::whereIn('id', $userIds)->delete();
+            User::whereIn('id', $data['userCheck'])->delete();
             DB::commit();
             return 1;
         } catch (\Throwable $th) {
@@ -99,6 +94,20 @@ class UserRepository implements UserRepositoryInterface
         } catch (\Throwable $th) {
             DB::rollBack();
         }
+    }
+
+    public function getUser($currentUser, $userIds = null)
+    {
+        $query = User::where('id', '!=',  $currentUser->id);
+        if($userIds){
+            $query = $query->whereIn('id', $userIds);
+        }
+        return $query->get();
+    }
+
+    public function insertUsers($users)
+    {
+        DB::table('users')->insert($users);
     }
 
     private function filterByKeyword($keyWord, $query)

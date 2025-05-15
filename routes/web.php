@@ -30,7 +30,6 @@ Route::middleware('auth')->group(function () {
     Route::get('users/import', [UserController::class, 'import'])->name('users.import');
     Route::get('users/download-sample', [UserController::class, 'downloadSampleFile'])->name('users.download-sample');
     Route::get('users/{user}', [UserController::class, 'specificEdit'])->name('users.show');
-
 });
 
 Route::prefix('api')->as('api.')->middleware('auth')->group(function() {
@@ -40,6 +39,7 @@ Route::prefix('api')->as('api.')->middleware('auth')->group(function() {
     Route::post('/users/create', [ApiUserController::class, 'createUser'])->name('users.create-user');
     Route::post('/users/load-user', [ApiUserController::class, 'loadingUserFromFile'])->name('users.load-user');
     Route::post('/users/import-user', [ApiUserController::class, 'importData'])->name('users.import-user');
+    Route::post('/users/export-users', [ApiUserController::class, 'exportUsers'])->name('users.export-users');
     Route::get('/users/{user}', [ApiUserController::class, 'getUserData'])->name('users.show');
     Route::put('/users/{user}/update', [ApiUserController::class, 'updateSpecificUser'])->name('users.update-specific');
     Route::delete('/users/{user}/delete', [ApiUserController::class, 'deleteSpecificUser'])->name('users.delete-specific');

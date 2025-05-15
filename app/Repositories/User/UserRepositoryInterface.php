@@ -12,4 +12,6 @@ interface UserRepositoryInterface
     public function updateSpecificUser($user, $data);
     public function deleteSpecificUser($user);
     public function createUSer($data);
+    public function getUser($currentUser, $userIds = null);
+    public function insertUsers($users);
 }

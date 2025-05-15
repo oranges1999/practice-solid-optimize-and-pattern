@@ -1,7 +1,10 @@
 <?php
 
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 if(!function_exists('storeFile')){
     function storeFile($folder, $file)
@@ -31,13 +34,41 @@ if(!function_exists('getFileUrl')){
     }
 }
 
+if(!function_exists('getFilePath')){
+    function getFilePath($url)
+    {
+        $pathArray = explode('/', $url);
+        return implode('/',array_splice($pathArray, 4));
+    }
+}
+
 if(!function_exists('deleteFile')){
-    function deleteFile($path)
+    function deleteFile($disk, $path)
     {
         try {
-            Storage::delete($path);
+            Storage::disk($disk)->delete($path);
         } catch (\Throwable $th) {
+            Log::info($th);
             throw $th;
         }
     }
+}
+
+if(!function_exists('exportFile')){
+    function exportFile($fileContent, $sheet, $spreadsheet, $currentUser)
+    {
+        $directory = 'temp/'.$currentUser->id;
+        if(!Storage::disk('public')->exists($directory)){
+            Storage::disk('public')->makeDirectory($directory);
+        }
+        $fullPath = storage_path('app/public/'.$directory.'/error_file.xlsx');
+        $row = 1;
+        foreach ($fileContent as $record) {
+            $sheet->fromArray($record, NULL, 'A' . $row++);
+        }
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($fullPath);
+        
+        return $directory.'/error_file.xlsx';
+}
 }

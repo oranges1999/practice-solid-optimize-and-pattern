@@ -192,14 +192,25 @@ const toImport = () => {
     router.visit(route('users.import'));
 }
 
-const toExport = (url) => {
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', 'import_error.xlsx')
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    URL.revokeObjectURL(url)
+const exportOptions = {
+    onlyExport: 0,
+    exportAndDelete: 1
+}
+
+const userType = {
+    all: 0,
+    selected: 1
+}
+
+
+const toExport = async (exportOption, userType) => {
+    let formData = new FormData()
+    formData.append('export_option', exportOption)
+    formData.append('user_type', userType)
+    userCheck.value.forEach((id) => {
+        formData.append('user_ids[]', id)
+    })
+    await axios.post(route('api.users.export-users'), formData)
 }
 </script>
 
@@ -222,10 +233,51 @@ const toExport = (url) => {
                         <div class="flex justify-between mb-[20px]">
                             <div>
                                 <el-button type="primary" @click="toEdit()">Bulk Edit</el-button>
-                                <el-button type="danger" @click="openPopup1()">Bulk Delete</el-button>
+                                <el-button type="danger" :disabled="!userCheck.length" @click="openPopup1()">Bulk Delete</el-button>
                                 <el-button type="success" @click="toCreateUser()">Create User</el-button>
                                 <el-button type="info" @click="toImport()">Import User</el-button>
-                                <el-button type="warning" @click="toExport(route(''))">Export User</el-button>
+                                <el-dropdown trigger="click">
+                                    <el-button type="warning" class="ml-[12px] el-dropdown-link">
+                                        Export User
+                                    </el-button>
+                                    <template #dropdown>
+                                    <el-dropdown-menu>
+                                        <div class="w-full flex justify-center">
+                                            <p class="text-[14px]">Only export</p>
+                                        </div>
+                                        <div class="flex">
+                                            <el-dropdown-item 
+                                                :disabled="!userCheck.length" 
+                                                @click="toExport(exportOptions.onlyExport, userType.selected)"
+                                            >
+                                                    Selected User
+                                            </el-dropdown-item>
+                                            <el-dropdown-item 
+                                                @click="toExport(exportOptions.onlyExport, userType.all)"
+                                            >
+                                                All User
+                                            </el-dropdown-item>
+                                        </div>
+                                        <div class="border-t-[1px] border-[gray] my-[10px]"></div>
+                                        <div class="w-full flex justify-center">
+                                            <p class="text-[14px]">Export and delete</p>
+                                        </div>
+                                        <div class="flex">
+                                            <el-dropdown-item 
+                                                :disabled="!userCheck.length"
+                                                @click="toExport(exportOptions.exportAndDelete, userType.selected)"
+                                            >
+                                                Selected User
+                                            </el-dropdown-item>
+                                            <el-dropdown-item
+                                                @click="toExport(exportOptions.exportAndDelete, userType.all)"
+                                            >
+                                                All User
+                                            </el-dropdown-item>
+                                        </div>
+                                    </el-dropdown-menu>
+                                    </template>
+                                </el-dropdown>
                             </div>
                             <div>
                                 <div class="flex gap-3">

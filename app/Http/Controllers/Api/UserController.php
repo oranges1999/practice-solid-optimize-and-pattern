@@ -65,11 +65,11 @@ class UserController extends Controller
         return response()->json(['user' => $user]);
     }
 
-    public function loadingUserFromFile(Request $request)
-    {
-        $data = $this->userService->loadUserFromFile($request->file('file'));
-        return response()->json($data);
-    }
+    // public function loadingUserFromFile(Request $request)
+    // {
+    //     $data = $this->userService->loadUserFromFile($request->file('file'));
+    //     return response()->json($data);
+    // }
 
     public function importData(Request $request)
     {   
@@ -77,5 +77,15 @@ class UserController extends Controller
         return $path
             ? response()->download($path, 'import_error.xlsx')->deleteFileAfterSend()
             : response()->json([], 200);
+    }
+
+    public function exportUsers(Request $request)
+    {
+        $this->userService->exportUsers(
+            $request->input('user_type'), 
+            $request->input('export_option'), 
+            $request->input('user_ids')
+        );
+        return response()->json([], 200);
     }
 }
