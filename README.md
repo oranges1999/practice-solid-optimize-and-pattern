@@ -1,61 +1,64 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<h3 align="center">
+#Practicing Project
+</h3>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Purpose of this project
 
-## About Laravel
+This project is a playground for me to practice any skills I've learned.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Knowledge Applied
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Repository Design Pattern**: This pattern is used to separate the data access logic from the business logic. It provides a clean abstraction for accessing data sources, making the code more maintainable and testable.
+- **Service Design Pattern**: This pattern organizes business logic into services, promoting separation of concerns. It helps keep the codebase modular, reusable, and easier to maintain by encapsulating related operations into distinct service classes.
+- **SOLID Principles**: A set of five design principles (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion) that help create maintainable, flexible, and scalable software architecture. Applying these principles improves code readability, reduces bugs, and facilitates easier testing and extension.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tool Used
 
-## Learning Laravel
+- **Laravel**
+- **Vue**
+- **Docker**
+- **Minio**
+- **Mailpit**
+- **PhpMyAdmin**
+- <del>**MeiliSearch**</del> (removed)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## How to install the project
+Step 1: Clone the project
+```bash
+git clone https://github.com/oranges1999/practice-solid-optimize-and-pattern.git
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Step 2: CD into project and copy .env file
+```bash
+cd /path/to/file/practice-solid-optimize-and-pattern
+cp .env.example .env
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Step 3: Install Sail and setup vendor via Docker
+```bash
+php artisan sail:install
+vendor/bin/sail composer install --ignore-platform-reqs
+```
 
-## Laravel Sponsors
+Step 4: Install Node modules
+```bash
+vendor/bin/sail npm install
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Step 5: Setup other requirement
+```bash
+vendor/bin/sail artisan key:generate
+vendor/bin/sail artisan migrate:fresh --seed
+vendor/bin/sail artisan storage:link
+```
 
-### Premium Partners
+## How to run the project
+Step 1: Run Sail in the background
+```bash
+vendor/bin/sail up -d
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development/)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Step 2: Render app.js, app.css
+```bash
+vendor/bin/sail npm run dev
+```
