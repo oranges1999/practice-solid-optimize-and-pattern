@@ -17,10 +17,13 @@ This project is a playground for me to practice any skills I've learned.
 - **Laravel**
 - **Vue**
 - **Docker**
+- <del>**MeiliSearch**</del> (removed)
 - **Minio**
 - **Mailpit**
 - **PhpMyAdmin**
-- <del>**MeiliSearch**</del> (removed)
+- **PhpSpreadSheet**
+- **Reverb**
+- **Echo**
 
 ## How to install the project
 Step 1: Clone the project
@@ -61,4 +64,11 @@ vendor/bin/sail up -d
 Step 2: Render app.js, app.css
 ```bash
 vendor/bin/sail npm run dev
+```
+
+Step 3: Run require service
+```bash
+sail artisan queue:work
+sail artisan schedule:word
+sail artisan reverb:start
 ```

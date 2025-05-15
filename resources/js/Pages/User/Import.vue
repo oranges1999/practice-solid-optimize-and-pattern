@@ -1,12 +1,13 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import axios from 'axios'
-import { router } from '@inertiajs/vue3';
-import { ElMessage } from 'element-plus';
-import { Link } from '@inertiajs/vue3';
+import { ElMessage, ElNotification } from 'element-plus';
+import { usePage } from '@inertiajs/vue3';
 
+const page = usePage()
+const user = computed(() => page.props.auth.user)
 const formErrors = ref({})
 const inputFile = ref()
 const input = ref()
@@ -48,9 +49,9 @@ const uploadFile = async (e) => {
 }
 
 const importData = async () => {
+    isLoading.value = true
     try {
         let formData = new FormData()
-        console.log(fileData.value)
         formData.append('user', JSON.stringify(fileData.value))
         formData.append('file', input.value.files[0])
         const response = await axios.post(route('api.users.import-user'), formData, {
@@ -79,21 +80,15 @@ const importData = async () => {
             reader.onload = () => {
                 try {
                     const json = JSON.parse(reader.result)
-                    console.log('Import thành công:', json)
                 } catch (e) {
-                    console.log('Phản hồi không phải JSON:', reader.result)
                 }
             }
             reader.readAsText(response.data)
-            router.visit(route('users.index'));
+            // router.visit(route('users.index'));
         }
     } catch (error) {
         console.log(error)
     }   
-}
-
-const downloadSample = () => {
-    router.visit(route('users.download-sample'))
 }
 
 function preventDefaults(e) {
@@ -106,18 +101,37 @@ onMounted(() => {
     events.forEach((eventName) => {
         document.body.addEventListener(eventName, preventDefaults)
     })
+    Echo.private(`App.Models.User.${user.value.id}`)
+        .listen('FileReceived', (e) => fireNotification(e))
+        .listen('FileEmpty', (e) => fireNotification(e))
+        .listen('FileLimit', (e) => fireNotification(e))
+        .listen('FileWarning', (e) => fireNotification(e))
 })
 
 onUnmounted(() => {
     events.forEach((eventName) => {
         document.body.removeEventListener(eventName, preventDefaults)
     })
+    Echo.private(`App.Models.User.${user.value.id}`)
+        .stopListening('FileReceived')
+        .stopListening('FileEmpty')
+        .stopListening('FileLimit')
+        .stopListening('FileWarning')
 })
 
 const deleteFile = () => {
     inputFile.value.value = null
     fileData.value = null
     fileName.value = ''
+}
+
+const fireNotification = (e) => {
+    isLoading.value = e.is_loading
+    ElNotification({
+        message: e.message,
+        type: e.type,
+        duration: 6000,
+    })
 }
 </script>
 

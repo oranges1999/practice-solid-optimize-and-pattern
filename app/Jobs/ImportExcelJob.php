@@ -4,6 +4,10 @@ namespace App\Jobs;
 
 use App\Enums\AppConst;
 use App\Enums\MailTypeEnum;
+use App\Events\FileEmpty;
+use App\Events\FileLimit;
+use App\Events\FileReceived;
+use App\Events\FileWarning;
 use App\Http\Requests\ImportUserRequest;
 use App\Mail\ImportMail;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -46,14 +50,15 @@ class ImportExcelJob implements ShouldQueue
             $header = ['Name', 'Email', 'Description', 'Type'];
             $fileContent = [$header,];
             $users = $this->loadUserFromFile($this->path);
-            TODO:
-            /**
-             * Implement realtime to send notification about job (MUST DO)
-             * Suggest: Reverb and echo
-             * Alternative: Pusher and ...
-            */
-                
+            $usersNumber = count($users) - 1;
             deleteFile('public', $this->path);
+            if($usersNumber <= 0 || $usersNumber >= 5001){
+                $usersNumber == 0 ?
+                    FileEmpty::dispatch($this->user) :
+                    FileLimit::dispatch($this->user) ;
+                return;
+            }
+
             $rules = (new ImportUserRequest())->rules();
             $validData = [];
             foreach ($users as $key => $user) {
@@ -77,6 +82,7 @@ class ImportExcelJob implements ShouldQueue
             }
             
             if($isError){
+                FileWarning::dispatch($this->user);
                 $spreadsheet = new Spreadsheet();
                 $sheet = $spreadsheet->getActiveSheet();
                 $fullPath = exportFile($fileContent, $sheet, $spreadsheet, $this->user);
@@ -86,6 +92,7 @@ class ImportExcelJob implements ShouldQueue
                     $fullPath
                 );
             } 
+
         } catch (\Throwable $th) {
             Log::info($th);
         }

@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Enums\ExportTypeEnum;
 use App\Enums\MailTypeEnum;
 use App\Enums\UserTypeExportEnum;
+use App\Events\ExportSuccess;
 use App\Mail\ExportMail;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -40,7 +41,6 @@ class ExportUsersToXlsx implements ShouldQueue
      */
     public function handle(): void
     {
-
         $query = User::where('id', '!=', $this->currentUser->id);
         if($this->userType == UserTypeExportEnum::SELECTED->value){
             $query = $query->whereIn('id', $this->userIds);
@@ -67,6 +67,10 @@ class ExportUsersToXlsx implements ShouldQueue
             MailTypeEnum::ExportMail->value, 
             $filePath
         );
+        $message = $this->exportType == ExportTypeEnum::EXPORT_AND_DELETE->value ?
+            'Users have been export and send to your email, all selected users will be deleted shortly afterwards' :
+            'Users have been export and send to your email' ;
+        ExportSuccess::dispatch($this->currentUser, $message);
         if($this->exportType == ExportTypeEnum::EXPORT_AND_DELETE->value){
             if($this->userType == UserTypeExportEnum::SELECTED->value){
                 User::whereIn('id', $this->userIds)->delete();
@@ -75,6 +79,6 @@ class ExportUsersToXlsx implements ShouldQueue
                 User::where('id', '!=', $this->currentUser->id)->delete();
             }
         }
-        // dd($users);
+        
     }
 }

@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Enums\AppConst;
 use App\Enums\UserTypeExportEnum;
+use App\Events\ExportRequestReceived;
+use App\Events\FileReceived;
 use App\Http\Requests\ImportUserRequest;
 use App\Http\Requests\UserCreateRequest;
 use App\Jobs\ExportUsersToXlsx;
@@ -162,6 +164,7 @@ class UserService
     public function import($data)
     {
         $currentUser = Auth::user();
+        FileReceived::dispatch($currentUser);
         $path = Storage::disk('public')
             ->putFileAs('Imports',$data['file'],uniqid().'_'.$data['file']->getClientOriginalName());
         ImportExcelJob::dispatch($currentUser, $path);
@@ -175,6 +178,7 @@ class UserService
     public function exportUsers($userType, $exportType, $userIds)
     {   
         $currentUser = Auth::user();
+        ExportRequestReceived::dispatch($currentUser);
         ExportUsersToXlsx::dispatch($currentUser, $userType, $exportType, $userIds);
     }
 }
