@@ -22,7 +22,7 @@ class ImportUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:20',
+            'name' => 'required|string|max:50',
             'email' => 'unique:users,email|required|email',
             'description' => 'required|max:255|string',
             'type' => 'integer|required|in:1,2',
