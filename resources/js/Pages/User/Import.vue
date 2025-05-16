@@ -8,7 +8,6 @@ import { usePage } from '@inertiajs/vue3';
 
 const page = usePage()
 const user = computed(() => page.props.auth.user)
-const formErrors = ref({})
 const inputFile = ref()
 const input = ref()
 const isUploading = ref(false)
@@ -50,14 +49,15 @@ const uploadFile = async (e) => {
 
 const importData = async () => {
     isLoading.value = true
+    
     try {
         let formData = new FormData()
-        formData.append('user', JSON.stringify(fileData.value))
-        formData.append('file', input.value.files[0])
+            formData.append('user', JSON.stringify(fileData.value))
+            formData.append('file', input.value.files[0])
         const response = await axios.post(route('api.users.import-user'), formData, {
-            responseType: 'blob',
-        })
-         const contentType = response.headers['content-type']
+                responseType: 'blob',
+            })
+        const contentType = response.headers['content-type']
         if (
             contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') ||
             contentType.includes('application/octet-stream')
@@ -87,7 +87,24 @@ const importData = async () => {
             // router.visit(route('users.index'));
         }
     } catch (error) {
-        console.log(error)
+        if (error.response && error.response.data instanceof Blob) {
+            const text = await error.response.data.text();
+            try {
+                const json = JSON.parse(text);
+                ElNotification({
+                    message: json.message,
+                    type: 'error',
+                    duration: 6000,
+                })
+                isLoading.value = false
+            } catch (e) {
+                console.log('Response text:', text);
+            }
+        } else if (error.response) {
+            console.log(error.response.data);
+        } else {
+            console.log(error.message);
+        }
     }   
 }
 
@@ -106,6 +123,7 @@ onMounted(() => {
         .listen('FileEmpty', (e) => fireNotification(e))
         .listen('FileLimit', (e) => fireNotification(e))
         .listen('FileWarning', (e) => fireNotification(e))
+        .listen('ImportSuccess', (e) => fireNotification(e))
 })
 
 onUnmounted(() => {
@@ -117,6 +135,7 @@ onUnmounted(() => {
         .stopListening('FileEmpty')
         .stopListening('FileLimit')
         .stopListening('FileWarning')
+        .stopListening('ImportSuccess')
 })
 
 const deleteFile = () => {

@@ -10,28 +10,25 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ExportSuccess implements ShouldBroadcast
+class ImportSuccess implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-
     private $user;
-    public $message;
     /**
      * Create a new event instance.
      */
-    public function __construct($user, $message)
+    public function __construct($user)
     {
         $this->user = $user;
-        $this->message = $message;
     }
 
     public function broadcastWith()
     {
         return [
+            'is_loading' => false,
+            'message' => 'Import succesfully',
             'type' => 'success',
-            'is_loading' => true,
-            'message' => $this->message
         ];
     }
 

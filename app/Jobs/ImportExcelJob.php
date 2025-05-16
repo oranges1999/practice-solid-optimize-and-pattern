@@ -8,6 +8,7 @@ use App\Events\FileEmpty;
 use App\Events\FileLimit;
 use App\Events\FileReceived;
 use App\Events\FileWarning;
+use App\Events\ImportSuccess;
 use App\Http\Requests\ImportUserRequest;
 use App\Mail\ImportMail;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -91,7 +92,9 @@ class ImportExcelJob implements ShouldQueue
                     MailTypeEnum::ImportMail->value, 
                     $fullPath
                 );
-            } 
+            } else {
+                ImportSuccess::dispatch($this->user);
+            }
 
         } catch (\Throwable $th) {
             Log::info($th);

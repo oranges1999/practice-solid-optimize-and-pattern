@@ -73,7 +73,10 @@ class UserController extends Controller
 
     public function importData(Request $request)
     {   
-        $path = $this->userService->import($request->all());
+        $file = $request->validate([
+            'file' => 'mimes:xlsx|required'
+        ]);
+        $path = $this->userService->import($file);
         return $path
             ? response()->download($path, 'import_error.xlsx')->deleteFileAfterSend()
             : response()->json([], 200);

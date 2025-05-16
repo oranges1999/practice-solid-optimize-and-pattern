@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Enums\ExportTypeEnum;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -10,28 +11,30 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ExportSuccess implements ShouldBroadcast
+class BeginDeletingUser implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-
+    private $type;
     private $user;
-    public $message;
     /**
      * Create a new event instance.
      */
-    public function __construct($user, $message)
+    public function __construct($type, $user)
     {
         $this->user = $user;
-        $this->message = $message;
+        $this->type = $type;
     }
-
     public function broadcastWith()
     {
+        $conditionalPart = $this->type == ExportTypeEnum::ONLY_EXPORT->value ?
+            '' :
+            'and deleted' ;
+        $message = "Selected users is being exported $conditionalPart, please wait a moment";
         return [
-            'type' => 'success',
-            'is_loading' => true,
-            'message' => $this->message
+            'type' => 'info',
+            'is_deleting' => true,
+            'message' => $message
         ];
     }
 

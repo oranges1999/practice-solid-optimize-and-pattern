@@ -1,11 +1,13 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import { onMounted, ref, watch } from 'vue'
+import { Head, usePage } from '@inertiajs/vue3';
+import { onMounted, ref, watch, onUnmounted, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 import axios from 'axios'
-import { ElMessageBox, ElMessage } from 'element-plus';
+import { ElMessageBox, ElMessage, ElNotification } from 'element-plus';
 
+const page = usePage()
+const user = computed(()=>page.props.auth.user)
 const users = ref(0)
 const userIds = ref([])
 const scrollPosition = ref(null)
@@ -32,10 +34,6 @@ const getUser = async (link) => {
 const scrollToSection = () => {
     scrollPosition.value.scrollIntoView({ behavior: 'smooth' });
 };
-
-onMounted(()=>{
-    getUser()
-})
 
 const toEdit = () => {
     router.visit(route('users.edit'))
@@ -212,6 +210,41 @@ const toExport = async (exportOption, userType) => {
     })
     await axios.post(route('api.users.export-users'), formData)
 }
+
+const isLoading = ref(false)
+
+const fireNotification = (e) => {
+    isLoading.value = e.is_loading
+    ElNotification({
+        message: e.message,
+        type: e.type,
+        duration: 6000,
+    })
+}
+
+onMounted(() => {
+    getUser()
+
+    Echo.private(`App.Models.User.${user.value.id}`)
+        .listen('ExportRequestReceived', (e) => fireNotification(e))
+        .listen('BeginDeletingUser', (e) => fireNotification(e))
+        .listen('FinishedDeletingUser', (e) => {
+            fireNotification(e)
+            getUser()
+        })
+        .listen('ExportSuccess', (e) => fireNotification(e))
+        .listen('UserEmpty', (e) => fireNotification(e))
+})
+
+onUnmounted(() => {
+    Echo.private(`App.Models.User.${user.value.id}`)
+        .stopListening('ExportRequestReceived')
+        .stopListening('BeginDeletingUser')
+        .stopListening('FinishedDeletingUser')
+        .stopListening('ExportSuccess')
+        .stopListening('UserEmpty')
+})
+
 </script>
 
 <template>

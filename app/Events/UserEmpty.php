@@ -10,28 +10,25 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ExportSuccess implements ShouldBroadcast
+class UserEmpty implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-
     private $user;
-    public $message;
     /**
      * Create a new event instance.
      */
-    public function __construct($user, $message)
+    public function __construct($user)
     {
         $this->user = $user;
-        $this->message = $message;
     }
 
     public function broadcastWith()
     {
         return [
-            'type' => 'success',
-            'is_loading' => true,
-            'message' => $this->message
+            'type' => 'error',
+            'message' => 'User base is empty, please import users first',
+            'is_loading' => false
         ];
     }
 
