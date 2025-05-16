@@ -11,6 +11,7 @@ This project is a playground for me to practice any skills I've learned.
 - **Repository Design Pattern**: This pattern is used to separate the data access logic from the business logic. It provides a clean abstraction for accessing data sources, making the code more maintainable and testable.
 - **Service Design Pattern**: This pattern organizes business logic into services, promoting separation of concerns. It helps keep the codebase modular, reusable, and easier to maintain by encapsulating related operations into distinct service classes.
 - **SOLID Principles**: A set of five design principles (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion) that help create maintainable, flexible, and scalable software architecture. Applying these principles improves code readability, reduces bugs, and facilitates easier testing and extension.
+- **Realtime Notification**: Implemented with Laravel Reverb and Echo to deliver live updates and improve user interactivity.
 
 ## Tool Used
 
