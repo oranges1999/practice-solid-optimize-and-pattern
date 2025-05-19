@@ -70,6 +70,6 @@ vendor/bin/sail npm run dev
 Step 3: Run require service
 ```bash
 sail artisan queue:work
-sail artisan schedule:word
+sail artisan schedule:work
 sail artisan reverb:start
 ```
