@@ -72,10 +72,6 @@ const handleCheckAll = () => {
     }
 }
 
-const compareArray = (array1, array2) => {
-    return JSON.stringify(array1.sort()) == JSON.stringify(array2.sort())
-}
-
 watch(
     () => [userCheck.value, userIds.value],
     () => {

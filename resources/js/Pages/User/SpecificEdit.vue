@@ -47,9 +47,6 @@ const handleFile = (file) => {
         reader.readAsDataURL(file)
     }
 }
-const dropFile = (file) => {
-    console.log(file)
-}
 
 const deleteAvatar = () => {
     if(props.user.avatar){
