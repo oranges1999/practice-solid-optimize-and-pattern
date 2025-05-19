@@ -1,10 +1,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import axios from 'axios'
 import { ElMessage, ElNotification } from 'element-plus';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, Head } from '@inertiajs/vue3';
 
 const page = usePage()
 const user = computed(() => page.props.auth.user)
@@ -32,19 +31,6 @@ const uploadFile = async (e) => {
     input.value = e.target
     fileName.value = e.target.files[0].name
     isLoading.value = false
-
-    // formData.append('file', e.target.files[0])
-    // try {
-    //     const data = await axios.post(route('api.users.load-user'), formData)
-    //     fileData.value = data.data
-    //     minLength.value = fileData.value.length > 10 ? 5 : fileData.value.length
-    //     fileName.value = e.target.files[0].name
-    //     isLoading.value = false
-    // } catch (error) {
-    //     isLoading.value = false
-    //     console.log(error)
-    //     deleteFile()
-    // }
 }
 
 const importData = async () => {
@@ -77,29 +63,18 @@ const importData = async () => {
             })
         } else {
             const reader = new FileReader()
-            reader.onload = () => {
-                try {
-                    const json = JSON.parse(reader.result)
-                } catch (e) {
-                }
-            }
             reader.readAsText(response.data)
-            // router.visit(route('users.index'));
         }
     } catch (error) {
         if (error.response && error.response.data instanceof Blob) {
             const text = await error.response.data.text();
-            try {
-                const json = JSON.parse(text);
-                ElNotification({
-                    message: json.message,
-                    type: 'error',
-                    duration: 6000,
-                })
-                isLoading.value = false
-            } catch (e) {
-                console.log('Response text:', text);
-            }
+            const json = JSON.parse(text);
+            ElNotification({
+                message: json.message,
+                type: 'error',
+                duration: 6000,
+            })
+            isLoading.value = false
         } else if (error.response) {
             console.log(error.response.data);
         } else {
@@ -212,7 +187,3 @@ const fireNotification = (e) => {
         </div>
     </AuthenticatedLayout>
 </template>
-
-<style scoped>
-
-</style>

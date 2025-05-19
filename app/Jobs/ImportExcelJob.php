@@ -53,12 +53,12 @@ class ImportExcelJob implements ShouldQueue
             $users = $this->loadUserFromFile($this->path);
             $usersNumber = count($users) - 1;
             deleteFile('public', $this->path);
-            if($usersNumber <= 0 || $usersNumber >= 5001){
-                $usersNumber == 0 ?
-                    FileEmpty::dispatch($this->user) :
-                    FileLimit::dispatch($this->user) ;
-                return;
-            }
+            if($usersNumber <= 0) {
+                FileEmpty::dispatch($this->user);  
+            } 
+            if($usersNumber >= 5001){
+                FileLimit::dispatch($this->user);
+            } 
 
             $rules = (new ImportUserRequest())->rules();
             $validData = [];
@@ -75,18 +75,17 @@ class ImportExcelJob implements ShouldQueue
                 }
             }
 
-            if (!empty($validData)) {
-                $chunks = array_chunk($validData, 1000);
-                foreach ($chunks as $user) {
-                    DB::table('users')->insert($user);
-                }
+            if (!empty($validData)){
+                $this->processDataValid($validData);
             }
             
             if($isError){
                 FileWarning::dispatch($this->user);
+
                 $spreadsheet = new Spreadsheet();
                 $sheet = $spreadsheet->getActiveSheet();
                 $fullPath = exportFile($fileContent, $sheet, $spreadsheet, $this->user);
+
                 SendMailAndDeleteFileJob::dispatch(
                     $this->user->email, 
                     MailTypeEnum::ImportMail->value, 
@@ -147,5 +146,12 @@ class ImportExcelJob implements ShouldQueue
         }
         
         return $rows;
+    }
+
+    private function processDataValid($validData)
+    {
+        foreach (array_chunk($validData, 1000) as $user) {
+            DB::table('users')->insert($user);
+        }
     }
 }

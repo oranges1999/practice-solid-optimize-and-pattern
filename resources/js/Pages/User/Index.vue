@@ -1,8 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, usePage, router } from '@inertiajs/vue3';
 import { onMounted, ref, watch, onUnmounted, computed } from 'vue'
-import { router } from '@inertiajs/vue3'
 import axios from 'axios'
 import { ElMessageBox, ElMessage, ElNotification } from 'element-plus';
 
@@ -155,7 +154,8 @@ const openPopup2 = (name, id) => {
                 type: 'success',
                 message: 'Delete completed',
             })
-        } catch (error) {
+        } catch (e) {
+            console.log(e)
             ElMessage({
                 type: 'error',
                 message: 'Delete failed',

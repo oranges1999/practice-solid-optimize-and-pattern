@@ -44,7 +44,7 @@ class UserController extends Controller
 
     public function getUserData(User $user)
     {
-        return response()->json($user, 200); 
+        return response()->json($user, 200);
     }
 
     public function updateSpecificUser(User $user, UpdateSpecificUserRequest $request)
@@ -65,14 +65,8 @@ class UserController extends Controller
         return response()->json(['user' => $user]);
     }
 
-    // public function loadingUserFromFile(Request $request)
-    // {
-    //     $data = $this->userService->loadUserFromFile($request->file('file'));
-    //     return response()->json($data);
-    // }
-
     public function importData(Request $request)
-    {   
+    {
         $file = $request->validate([
             'file' => 'mimes:xlsx|required'
         ]);
@@ -85,8 +79,8 @@ class UserController extends Controller
     public function exportUsers(Request $request)
     {
         $this->userService->exportUsers(
-            $request->input('user_type'), 
-            $request->input('export_option'), 
+            $request->input('user_type'),
+            $request->input('export_option'),
             $request->input('user_ids')
         );
         return response()->json([], 200);

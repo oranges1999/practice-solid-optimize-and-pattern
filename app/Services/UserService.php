@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -33,14 +34,14 @@ class UserService
     }
 
     public function getUser($data, $currentUser)
-    {  
+    {
         $users = $this->userRepository->getAllUser($data, $currentUser);
         return collect($users);
 
         /**
-         * 
+         *
          * REMOVE MEILISEARCH
-         * 
+         *
          */
 
         // if (!empty($data['key_word'])) {
@@ -131,7 +132,7 @@ class UserService
             $this->userRepository->updateSpecificUser($user, $data);
             return 1;
         } catch (\Throwable $th) {
-            throw $th;
+            Log::info($th);
         }
         
     }
@@ -157,7 +158,7 @@ class UserService
             }
             return $user->refresh();
         } catch (\Throwable $th) {
-            throw $th;
+            Log::info($th);
         }
     }
 
@@ -176,7 +177,7 @@ class UserService
     }
 
     public function exportUsers($userType, $exportType, $userIds)
-    {   
+    {
         $currentUser = Auth::user();
         ExportRequestReceived::dispatch($currentUser);
         ExportUsersToXlsx::dispatch($currentUser, $userType, $exportType, $userIds);
