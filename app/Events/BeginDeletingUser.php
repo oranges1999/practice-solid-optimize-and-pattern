@@ -13,7 +13,9 @@ use Illuminate\Queue\SerializesModels;
 
 class BeginDeletingUser implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     private $type;
     private $user;
@@ -46,7 +48,7 @@ class BeginDeletingUser implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('App.Models.User.'.$this->user->id),
+            new PrivateChannel('App.Models.User.' . $this->user->id),
         ];
     }
 }

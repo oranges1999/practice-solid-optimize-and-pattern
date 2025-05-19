@@ -28,9 +28,12 @@ class UserController extends Controller
 
     public function specificEdit(User $user)
     {
-        return inertia('User/SpecificEdit', [
+        return inertia(
+            'User/SpecificEdit',
+            [
             'user' => $user,
-        ]);
+            ]
+        );
     }
 
     public function create()
@@ -47,7 +50,7 @@ class UserController extends Controller
     {
         // dd(public_path('public/sample/sample_file.xlsx'));
         $path = $this->userService->getSampleFilePath();
-        if(file_exists($path)){
+        if (file_exists($path)) {
             return response()->download($path);
         }
     }

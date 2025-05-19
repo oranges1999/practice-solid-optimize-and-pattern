@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<ruleset name="Laravel Project Rules">
+  <description>PSR-12 ruleset with relaxed comments for Laravel</description>
+
+  <!-- Áp dụng PSR-12 -->
+  <rule ref="PSR12">
+    <!-- Skip file comment -->
+    <exclude name="Squiz.Commenting.FileComment.Missing"/>
+    <!-- Skip class comment -->
+    <exclude name="Squiz.Commenting.ClassComment.Missing"/>
+  </rule>
+
+  <!-- List folder to check -->
+  <file>app</file>
+  <file>routes</file>
+  <file>config</file>
+  <file>database</file>
+
+  <!-- Folders skipped -->
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+  <exclude-pattern>*/node_modules/*</exclude-pattern>
+  <exclude-pattern>*/storage/*</exclude-pattern>
+  <exclude-pattern>*/bootstrap/cache/*</exclude-pattern>
+
+  <!-- Charset -->
+  <config name="charset" value="utf-8"/>
+</ruleset>

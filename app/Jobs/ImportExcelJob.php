@@ -53,21 +53,24 @@ class ImportExcelJob implements ShouldQueue
             $users = $this->loadUserFromFile($this->path);
             $usersNumber = count($users) - 1;
             deleteFile('public', $this->path);
-            if($usersNumber <= 0) {
-                FileEmpty::dispatch($this->user);  
-            } 
-            if($usersNumber >= 5001){
+            if ($usersNumber <= 0) {
+                FileEmpty::dispatch($this->user);
+            }
+            if ($usersNumber >= 5001) {
                 FileLimit::dispatch($this->user);
-            } 
+            }
 
             $rules = (new ImportUserRequest())->rules();
             $validData = [];
             foreach ($users as $key => $user) {
-                if($key == 0) continue;
+                if ($key == 0) {
+                    continue;
+                }
                 $userData = $this->sampleData($user);
                 $validator = Validator::make($userData, $rules);
-                if(!$validator->fails()){
-                    $validData[] = $userData;;
+                if (!$validator->fails()) {
+                    $validData[] = $userData;
+                    ;
                 } else {
                     $isError = true;
                     $user[] = trim($this->formatValidateMessage($validator));
@@ -75,11 +78,11 @@ class ImportExcelJob implements ShouldQueue
                 }
             }
 
-            if (!empty($validData)){
+            if (!empty($validData)) {
                 $this->processDataValid($validData);
             }
-            
-            if($isError){
+
+            if ($isError) {
                 FileWarning::dispatch($this->user);
 
                 $spreadsheet = new Spreadsheet();
@@ -87,28 +90,27 @@ class ImportExcelJob implements ShouldQueue
                 $fullPath = exportFile($fileContent, $sheet, $spreadsheet, $this->user);
 
                 SendMailAndDeleteFileJob::dispatch(
-                    $this->user->email, 
-                    MailTypeEnum::ImportMail->value, 
+                    $this->user->email,
+                    MailTypeEnum::ImportMail->value,
                     $fullPath
                 );
             } else {
                 ImportSuccess::dispatch($this->user);
             }
-
         } catch (\Throwable $th) {
             Log::info($th);
         }
     }
 
-     private function sampleData($user)
+    private function sampleData($user)
     {
         return [
-            'name' => $user[0],
-            'email' => $user[1],
-            'description' => $user[2],
-            'type' => $user[3],
-            'avatar' => AppConst::DEFAULT_AVATAR->value,
-            'password' => AppConst::DEFAULT_PASSWORD->value,
+           'name' => $user[0],
+           'email' => $user[1],
+           'description' => $user[2],
+           'type' => $user[3],
+           'avatar' => AppConst::DEFAULT_AVATAR->value,
+           'password' => AppConst::DEFAULT_PASSWORD->value,
         ];
     }
 
@@ -116,7 +118,7 @@ class ImportExcelJob implements ShouldQueue
     {
         $errorContent = '';
         foreach ($validator->errors()->toArray() as $value) {
-            foreach($value as $error){
+            foreach ($value as $error) {
                 $errorContent .= "$error\n";
             }
         }
@@ -125,14 +127,14 @@ class ImportExcelJob implements ShouldQueue
 
     private function loadUserFromFile($path)
     {
-        $path = storage_path('app/public/'.$path);
+        $path = storage_path('app/public/' . $path);
         $reader = new Xlsx();
         $reader->setReadDataOnly(true);
         $spreadsheet = $reader->load($path);
         $sheet = $spreadsheet->getActiveSheet();
 
         $rows = [];
-        foreach($sheet->getRowIterator() as $row){
+        foreach ($sheet->getRowIterator() as $row) {
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(false);
             $rowData = [];
@@ -144,7 +146,7 @@ class ImportExcelJob implements ShouldQueue
             }
             $rows[] = $rowData;
         }
-        
+
         return $rows;
     }
 

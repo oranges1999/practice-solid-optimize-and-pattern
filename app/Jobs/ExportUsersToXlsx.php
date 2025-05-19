@@ -46,10 +46,10 @@ class ExportUsersToXlsx implements ShouldQueue
     public function handle(): void
     {
         $query = User::where('id', '!=', $this->currentUser->id);
-        if($this->userType == UserTypeExportEnum::SELECTED->value){
+        if ($this->userType == UserTypeExportEnum::SELECTED->value) {
             $query = $query->whereIn('id', $this->userIds);
-        } 
-        if(!$query->exists()){
+        }
+        if (!$query->exists()) {
             UserEmpty::dispatch($this->currentUser);
             return;
         }
@@ -57,30 +57,33 @@ class ExportUsersToXlsx implements ShouldQueue
         $sheet = $spreadsheet->getActiveSheet();
         $header = ['Name', 'Email', 'Description', 'Type', 'Avatar'];
         $fileContent[] = [$header,];
-        $query->chunk(500, function($users) use (&$fileContent) {
-            foreach($users as $key => $user){
-                $fileContent[] = [
+        $query->chunk(
+            500,
+            function ($users) use (&$fileContent) {
+                foreach ($users as $key => $user) {
+                    $fileContent[] = [
                     'name' => $user['name'],
                     'email' => $user['email'],
                     'description' => $user['description'],
                     'type' => $user['type'],
                     'avatar' => $user['avatar'],
-                ];
+                    ];
+                }
             }
-        });
+        );
         $filePath = exportFile($fileContent, $sheet, $spreadsheet, $this->currentUser);
         SendMailAndDeleteFileJob::dispatch(
-            $this->currentUser->email, 
-            MailTypeEnum::ExportMail->value, 
+            $this->currentUser->email,
+            MailTypeEnum::ExportMail->value,
             $filePath
         );
-        
-        if($this->exportType == ExportTypeEnum::EXPORT_AND_DELETE->value){
+
+        if ($this->exportType == ExportTypeEnum::EXPORT_AND_DELETE->value) {
             // BeginDeletingUser::dispatch(ExportTypeEnum::EXPORT_AND_DELETE, $this->currentUser);
-            if($this->userType == UserTypeExportEnum::SELECTED->value){
+            if ($this->userType == UserTypeExportEnum::SELECTED->value) {
                 User::whereIn('id', $this->userIds)->delete();
             }
-            if($this->userType == UserTypeExportEnum::ALL->value){
+            if ($this->userType == UserTypeExportEnum::ALL->value) {
                 User::where('id', '!=', $this->currentUser->id)->delete();
             }
             FinishedDeletingUser::dispatch(ExportTypeEnum::EXPORT_AND_DELETE, $this->currentUser);
@@ -90,6 +93,5 @@ class ExportUsersToXlsx implements ShouldQueue
                 'Users have been export and send to your email' ;
             ExportSuccess::dispatch($this->currentUser, $message);
         }
-        
     }
 }

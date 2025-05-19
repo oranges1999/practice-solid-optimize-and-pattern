@@ -32,13 +32,13 @@ class SendMailAndDeleteFileJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $template = $this->type == MailTypeEnum::ExportMail->value?
-            new ExportMail(storage_path('app/public/'.$this->path)):
-            new ImportMail(storage_path('app/public/'.$this->path));
-            
+        $template = $this->type == MailTypeEnum::ExportMail->value ?
+            new ExportMail(storage_path('app/public/' . $this->path)) :
+            new ImportMail(storage_path('app/public/' . $this->path));
+
         Mail::to($this->email)->send($template);
 
-        if(Storage::disk('public')->exists($this->path)){
+        if (Storage::disk('public')->exists($this->path)) {
             deleteFile('public', $this->path);
         }
     }

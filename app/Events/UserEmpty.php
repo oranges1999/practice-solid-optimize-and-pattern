@@ -12,7 +12,9 @@ use Illuminate\Queue\SerializesModels;
 
 class UserEmpty implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     private $user;
     /**
@@ -40,7 +42,7 @@ class UserEmpty implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('App.Models.User.'.$this->user->id),
+            new PrivateChannel('App.Models.User.' . $this->user->id),
         ];
     }
 }

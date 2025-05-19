@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('name')->index()->change();
-        });
+        Schema::table(
+            'users',
+            function (Blueprint $table) {
+                $table->string('name')->index()->change();
+            }
+        );
     }
 
     /**
@@ -21,8 +24,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('name')->change();
-        });
+        Schema::table(
+            'users',
+            function (Blueprint $table) {
+                $table->string('name')->change();
+            }
+        );
     }
 };

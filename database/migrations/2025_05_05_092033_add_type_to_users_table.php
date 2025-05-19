@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->tinyInteger('type')->index()->after('description');
-        });
+        Schema::table(
+            'users',
+            function (Blueprint $table) {
+                $table->tinyInteger('type')->index()->after('description');
+            }
+        );
     }
 
     /**
@@ -21,8 +24,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('type');
-        });
+        Schema::table(
+            'users',
+            function (Blueprint $table) {
+                $table->dropColumn('type');
+            }
+        );
     }
 };

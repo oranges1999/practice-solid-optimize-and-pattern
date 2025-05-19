@@ -40,7 +40,7 @@ class CreateServiceCommand extends Command
         // 2. Tạo file
         $fileName = $name . 'Service';
         $filePath = $servicesRoot . '/' . $fileName . '.' . 'php';
-        if(!File::exists($filePath)){
+        if (!File::exists($filePath)) {
             $content = "<?php\n\nnamespace App\\Services;\n\nclass $fileName\n{\n    // \n}\n";
             File::put($filePath, $content);
             $this->info("$fileName.php created");

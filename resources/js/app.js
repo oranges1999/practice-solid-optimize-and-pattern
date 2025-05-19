@@ -10,9 +10,10 @@ import 'element-plus/dist/index.css'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
-createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
-    resolve: (name) =>
+createInertiaApp(
+    {
+        title: (title) => `${title} - ${appName}`,
+        resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.vue`,
             import.meta.glob('./Pages/**/*.vue'),
@@ -23,8 +24,9 @@ createInertiaApp({
             .use(ZiggyVue)
             .use(ElementPlus)
             .mount(el);
-    },
-    progress: {
-        color: '#4B5563',
-    },
-});
+        },
+        progress: {
+            color: '#4B5563',
+        },
+    }
+);

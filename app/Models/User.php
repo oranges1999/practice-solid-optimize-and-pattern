@@ -10,8 +10,12 @@ use Laravel\Scout\Searchable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, Searchable;
+    /**
+ * @use HasFactory<\Database\Factories\UserFactory>
+*/
+    use HasFactory;
+    use Notifiable;
+    use Searchable;
 
     /**
      * The attributes that are mass assignable.

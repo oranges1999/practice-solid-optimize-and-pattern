@@ -39,9 +39,7 @@ class UserService
         return collect($users);
 
         /**
-         *
          * REMOVE MEILISEARCH
-         *
          */
 
         // if (!empty($data['key_word'])) {
@@ -119,14 +117,14 @@ class UserService
         return 1;
     }
 
-    public function updateSpecificUser($user,$data)
+    public function updateSpecificUser($user, $data)
     {
         try {
-            if(array_key_exists('avatar', $data) && $data['avatar'] instanceof UploadedFile){
+            if (array_key_exists('avatar', $data) && $data['avatar'] instanceof UploadedFile) {
                 $path = storeFile("avatars/$user->id", $data['avatar']);
                 $data['avatar'] = getFileUrl($path);
             }
-            if($user->avatar && Storage::disk('s3')->exists(getFilePath($user->avatar))){
+            if ($user->avatar && Storage::disk('s3')->exists(getFilePath($user->avatar))) {
                 deleteFile('s3', getFilePath($user->avatar));
             }
             $this->userRepository->updateSpecificUser($user, $data);
@@ -134,7 +132,6 @@ class UserService
         } catch (\Throwable $th) {
             Log::info($th);
         }
-        
     }
 
     public function deleteSpecificUser($user)
@@ -147,12 +144,12 @@ class UserService
     public function createNewUser($data)
     {
         try {
-            if(array_key_exists('avatar', $data) && $data['avatar']){
+            if (array_key_exists('avatar', $data) && $data['avatar']) {
                 $image = array_pop($data);
             }
             $user = $this->userRepository->createUser($data);
-            if($image){
-                $path = storeFile('avatars/'.$user->id, $image);
+            if ($image) {
+                $path = storeFile('avatars/' . $user->id, $image);
                 $avatar = getFileUrl($path);
                 $this->updateSpecificUser($user, ['avatar' => $avatar]);
             }
@@ -167,7 +164,7 @@ class UserService
         $currentUser = Auth::user();
         FileReceived::dispatch($currentUser);
         $path = Storage::disk('public')
-            ->putFileAs('Imports',$data['file'],uniqid().'_'.$data['file']->getClientOriginalName());
+            ->putFileAs('Imports', $data['file'], uniqid() . '_' . $data['file']->getClientOriginalName());
         ImportExcelJob::dispatch($currentUser, $path);
     }
 

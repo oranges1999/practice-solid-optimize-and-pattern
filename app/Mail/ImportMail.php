@@ -12,10 +12,11 @@ use Illuminate\Queue\SerializesModels;
 
 class ImportMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     private $file;
-    
+
     /**
      * Create a new message instance.
      */

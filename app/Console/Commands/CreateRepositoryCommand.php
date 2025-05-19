@@ -52,7 +52,7 @@ class CreateRepositoryCommand extends Command
 
         // 4. Create Interface
         if (!File::exists($interfacePath)) {
-            $interfaceContent = "<?php\n\nnamespace App\Repositories\\$name;\n\ninterface $interfaceName\n{\n    // \n}\n";
+            $interfaceContent = "<?php\n\nnamespace App\Repositories\\$name;\n\ninterface $interfaceName\n{\n    // \n}\n"; // @phpcs:ignore
             File::put($interfacePath, $interfaceContent);
             $this->info("$interfaceName.php created");
         } else {
@@ -61,7 +61,7 @@ class CreateRepositoryCommand extends Command
 
         // 5. Create repository
         if (!File::exists($repositoryPath)) {
-            $repositoryContent = "<?php\n\nnamespace App\Repositories\\$name;\n\nclass $repositoryName implements $interfaceName\n{\n    // \n}\n";
+            $repositoryContent = "<?php\n\nnamespace App\Repositories\\$name;\n\nclass $repositoryName implements $interfaceName\n{\n    // \n}\n"; // @phpcs:ignore
             File::put($repositoryPath, $repositoryContent);
             $this->info("$repositoryName.php created");
         } else {
@@ -77,7 +77,7 @@ class CreateRepositoryCommand extends Command
 
         $interfaceFull = "App\\Repositories\\$name\\$interfaceName";
         $repositoryFull = "App\\Repositories\\$name\\$repositoryName";
-        $bindCode = "        \$this->app->bind(\\$interfaceFull::class, \\$repositoryFull::class);";
+        $bindCode = "        \$this->app->bind(\\$interfaceFull::class,\\$repositoryFull::class);";
 
         // Read provider content
         $providerContent = File::get($providerPath);
@@ -92,7 +92,7 @@ class CreateRepositoryCommand extends Command
         if (!Str::contains($providerContent, 'public function register')) {
             $providerContent = preg_replace(
                 '/class RepositoryServiceProvider extends ServiceProvider\s*\{/',
-                "class RepositoryServiceProvider extends ServiceProvider\n{\n    /**\n     * Register services.\n     */\n    public function register(): void\n    {\n    }\n",
+                "class RepositoryServiceProvider extends ServiceProvider\n{\n    /**\n     * Register services.\n     */\n    public function register(): void\n    {\n    }\n", // @phpcs:ignore
                 $providerContent
             );
         }
@@ -103,7 +103,7 @@ class CreateRepositoryCommand extends Command
             $pattern = '/(public function register\(\)(?:\s*:\s*void)?\s*\{)([\s\S]*?)(\n\s*\})/';
             $replacement = '$1$2' . "\n$bindCode$3";
             $providerContent = preg_replace($pattern, $replacement, $providerContent);
-            
+
             if (File::put($providerPath, $providerContent)) {
                 $this->info('Repository binded.');
             } else {

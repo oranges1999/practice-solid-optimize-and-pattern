@@ -12,7 +12,9 @@ use Illuminate\Queue\SerializesModels;
 
 class FileWarning implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     private $user;
     /**
@@ -27,7 +29,10 @@ class FileWarning implements ShouldBroadcast
     {
         return [
             'type' => 'warning',
-            'message' => 'There is some data does not meet requirement, please check the file that we have sent to your email for more details',
+            'message' => '
+                There is some data does not meet requirement,
+                please check the file that we have sent to your email for more details
+            ',
             'is_loading' => false
         ];
     }
@@ -40,7 +45,7 @@ class FileWarning implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('App.Models.User.'.$this->user->id),
+            new PrivateChannel('App.Models.User.' . $this->user->id),
         ];
     }
 }

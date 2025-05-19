@@ -9,11 +9,13 @@ define('LARAVEL_START', microtime(true));
 
 // Determine if the application is in maintenance mode...
 if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
-    require_once $maintenance;
+    include_once $maintenance;
 }
 
 // Bootstrap Laravel and handle the request...
-/** @var Application $app */
-$app = require_once __DIR__.'/../bootstrap/app.php';
+/**
+ * @var Application $app 
+*/
+$app = include_once __DIR__.'/../bootstrap/app.php';
 
 $app->handleRequest(Request::capture());
