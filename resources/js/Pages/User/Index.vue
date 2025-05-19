@@ -80,21 +80,22 @@ const compareArray = (array1, array2) => {
 watch(
     () => [userCheck.value, userIds.value],
     () => {
-        let filterUserCheckIds = userIds.value.filter((id) => {
-            return userCheck.value.includes(id)
-        })
-        let filterUserIds = userCheck.value.filter((id) => {
-            return userIds.value.includes(id)
-        })
-        if(filterUserCheckIds.length >= 0 && filterUserIds.length == 0){
+        let filterUserCheckIds = userIds.value.filter((id) => userCheck.value.includes(id))
+        let filterUserIds = userCheck.value.filter((id) => userIds.value.includes(id))
+        
+        let userIdsLength = userIds.value.length
+        let filterUserCheckIdsLength = filterUserCheckIds.length
+        let filterUserIdsLength = filterUserIds.length
+
+        if(filterUserCheckIdsLength === 0 && filterUserIdsLength === 0){
             isIndeterminate.value = false;
             checkAll.value = false;
         }
-        if(filterUserCheckIds.length > 0 && filterUserIds.length > 0 && filterUserIds.length < userIds.value.length ){
+        if(filterUserIdsLength > 0 && filterUserIdsLength < userIdsLength ){
             isIndeterminate.value = true;
             checkAll.value = false;
         }
-        if(filterUserCheckIds.length > 0 && filterUserIds.length == userIds.value.length){
+        if(filterUserIdsLength === userIdsLength){
             isIndeterminate.value = false;
             checkAll.value = true;
         }
