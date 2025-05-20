@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\MarkOnlineStatusController;
 use App\Http\Controllers\Api\UserController as ApiUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
@@ -32,7 +33,7 @@ Route::get(
 Route::middleware('auth')->group(function () {
     Route::prefix('/profile')
         ->as('profile.')
-        ->controller([ProfileController::class])
+        ->controller(ProfileController::class)
         ->group(function() {
             Route::get('/', 'edit')->name('edit');
             Route::patch('/', 'update')->name('update');
@@ -67,6 +68,14 @@ Route::prefix('api')->as('api.')->middleware('auth')->group(function () {
             Route::get('/{user}', 'getUserData')->name('show');
             Route::put('/{user}/update', 'updateSpecificUser')->name('update-specific');
             Route::delete('/{user}/delete', 'deleteSpecificUser')->name('delete-specific');
+        });
+
+    Route::prefix('/users/status')
+        ->as('users.status.')
+        ->controller(MarkOnlineStatusController::class)
+        ->group(function() {
+            Route::get('/mark-online', 'markStatusOnline')->name('mark-online');
+            Route::get('/mark-offline', 'markStatusOffline')->name('mark-offline');
         });
 });
 

@@ -6,18 +6,18 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
-import { usePage } from '@inertiajs/vue3';
 
-const user = usePage().props.auth.user
 const showingNavigationDropdown = ref(false);
-
 onMounted(()=>{
     Echo.join('getOnlineUsers')
-        .joining(() => {
-
+        .here((users) => {
+            console.log(users)
         })
-        .leaving(() => {
-
+        .joining((user) => {
+            console.log(user)
+        })
+        .leaving((user) => {
+            console.log(user)
         })
         .error((e) => {
             console.log(e)
