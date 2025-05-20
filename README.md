@@ -53,7 +53,7 @@ Step 5: Setup other requirement
 ```bash
 vendor/bin/sail artisan key:generate
 vendor/bin/sail artisan migrate:fresh --seed
-vendor/bin/sail artisan storage:link
+vendor/bin/sail artisan storage:link # Optional
 ```
 
 ## How to run the project

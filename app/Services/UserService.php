@@ -40,6 +40,7 @@ class UserService
 
         /**
          * REMOVE MEILISEARCH
+         * reason: Can't use to filter data, just search
          */
 
         // if (!empty($data['key_word'])) {

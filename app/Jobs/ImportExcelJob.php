@@ -55,9 +55,11 @@ class ImportExcelJob implements ShouldQueue
             deleteFile('public', $this->path);
             if ($usersNumber <= 0) {
                 FileEmpty::dispatch($this->user);
+                return;
             }
             if ($usersNumber >= 5001) {
                 FileLimit::dispatch($this->user);
+                return;
             }
 
             $rules = (new ImportUserRequest())->rules();
@@ -70,7 +72,6 @@ class ImportExcelJob implements ShouldQueue
                 $validator = Validator::make($userData, $rules);
                 if (!$validator->fails()) {
                     $validData[] = $userData;
-                    ;
                 } else {
                     $isError = true;
                     $user[] = trim($this->formatValidateMessage($validator));
