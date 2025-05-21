@@ -242,12 +242,15 @@ onUnmounted(() => {
         .stopListening('UserEmpty')
 })
 
+const getData = (data) => {
+    console.log(data)
+}
 </script>
 
 <template>
     <Head title="Users" />
 
-    <AuthenticatedLayout>
+    <AuthenticatedLayout @update-online-user="getData">
         <template #header>
             <h2
                 class="text-xl font-semibold leading-tight text-gray-800"
