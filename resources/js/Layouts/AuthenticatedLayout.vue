@@ -6,36 +6,43 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link, usePage } from '@inertiajs/vue3';
+import onlineUpdateTypes from '@/Consts/OnlineUpdateTypes';
 
 const currentUser = usePage().props.auth.user
 const showingNavigationDropdown = ref(false);
 const onlineUsers = ref([])
-const emit = defineEmits(['updateOnlineUser'])
-const emitUpdateUser = (onlineUsers) => {
-    emit('updateOnlineUser', {users: onlineUsers})
+const emit = defineEmits(['updateOnlineUser', 'currentOnlineUsers'])
+const emitUpdateUser = (updateUser, type) => {
+    emit('updateOnlineUser', {
+        user: updateUser,
+        type: type
+    })
 }
+const emitCurrentOnlineUser = (currentOnlineUsers) => {
+    emit('currentOnlineUsers', {users: currentOnlineUsers})
+}
+
 onMounted(()=>{
     Echo.join('getOnlineUsers')
         .here((users) => {
             onlineUsers.value = users.filter((onlUser) => onlUser.id !== currentUser.id)
-            emitUpdateUser(onlineUsers.value)
+            emitCurrentOnlineUser(onlineUsers.value)
         })
         .joining((joinUser) => {
-            onlineUsers.value.push(joinUser)
-            emitUpdateUser(onlineUsers.value)
-
+            emitUpdateUser(joinUser, onlineUpdateTypes.join)
+            console.log('join')
         })
         .leaving((leftUser) => {
-            onlineUsers.value = onlineUsers.value.filter((u) => u.id !== leftUser.id)
-            emitUpdateUser(onlineUsers.value)
-
+            emitUpdateUser(leftUser, onlineUpdateTypes.left)
+            console.log('left')
         })
         .error((e) => {
             console.log(e)
         })
 })
+
 onUnmounted(() => {
-    Echo.leave('getOnlineUsers')
+        Echo.leave('getOnlineUsers')
 })
 </script>
 

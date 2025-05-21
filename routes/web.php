@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\MarkOnlineStatusController;
+use App\Http\Controllers\Api\SendNotiWhenLeaveController;
 use App\Http\Controllers\Api\UserController as ApiUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
@@ -54,6 +54,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::prefix('api')->as('api.')->middleware('auth')->group(function () {
+    Route::post('/users/leave', [SendNotiWhenLeaveController::class, 'sendNotification'])->name('users.leave');
+
     Route::prefix('/users')
         ->as('users.')
         ->controller(ApiUserController::class)
@@ -70,13 +72,6 @@ Route::prefix('api')->as('api.')->middleware('auth')->group(function () {
             Route::delete('/{user}/delete', 'deleteSpecificUser')->name('delete-specific');
         });
 
-    Route::prefix('/users/status')
-        ->as('users.status.')
-        ->controller(MarkOnlineStatusController::class)
-        ->group(function() {
-            Route::get('/mark-online', 'markStatusOnline')->name('mark-online');
-            Route::get('/mark-offline', 'markStatusOffline')->name('mark-offline');
-        });
 });
 
 require __DIR__ . '/auth.php';
