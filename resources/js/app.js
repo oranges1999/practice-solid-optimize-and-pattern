@@ -1,13 +1,12 @@
 import '../css/app.css';
 import './bootstrap';
 
-import { createInertiaApp, usePage } from '@inertiajs/vue3';
+import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
-import Echo from 'laravel-echo';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 

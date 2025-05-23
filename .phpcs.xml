@@ -21,6 +21,9 @@
   <exclude-pattern>*/node_modules/*</exclude-pattern>
   <exclude-pattern>*/storage/*</exclude-pattern>
   <exclude-pattern>*/bootstrap/cache/*</exclude-pattern>
+  <exclude-pattern>*/build/*</exclude-pattern>
+  <exclude-pattern>*/ziggy.js</exclude-pattern>
+  <exclude-pattern>*/public/index.php</exclude-pattern>
 
   <!-- Charset -->
   <config name="charset" value="utf-8"/>

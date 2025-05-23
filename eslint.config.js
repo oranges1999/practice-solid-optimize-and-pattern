@@ -18,9 +18,9 @@ export default defineConfig(
         'out/',
         'dist/',
         'build/',
-        "**/.vscode/**", 
-        "**/node_modules/**", 
-        "**/dist/**", 
+        "**/.vscode/**",
+        "**/node_modules/**",
+        "**/dist/**",
         "**/.gitignore",
         "**/composer.json",
         "**/vendor/**",
@@ -62,24 +62,24 @@ export default defineConfig(
         }
     },
     // JSON configuration
-    { 
-        files: ["**/*.json"], 
-        plugins: { json: jsonPlugin }, 
-        language: "json/json", 
-        extends: ["json/recommended"] 
+    {
+        files: ["**/*.json"],
+        plugins: { json: jsonPlugin },
+        language: "json/json",
+        extends: ["json/recommended"]
     },
-    { 
-        files: ["**/*.jsonc"], 
-        plugins: { json: jsonPlugin }, 
-        language: "json/jsonc", 
-        extends: ["json/recommended"] 
+    {
+        files: ["**/*.jsonc"],
+        plugins: { json: jsonPlugin },
+        language: "json/jsonc",
+        extends: ["json/recommended"]
     },
     // CSS configuration
-    { 
-        files: ["**/*.css"], 
-        plugins: { css: cssPlugin }, 
-        language: "css/css", 
-        extends: ["css/recommended"] 
+    {
+        files: ["**/*.css"],
+        plugins: { css: cssPlugin },
+        language: "css/css",
+        extends: ["css/recommended"]
     },
     ]
 )

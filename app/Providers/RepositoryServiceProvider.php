@@ -16,6 +16,14 @@ class RepositoryServiceProvider extends ServiceProvider
             \App\Repositories\User\UserRepositoryInterface::class,
             \App\Repositories\User\UserRepository::class
         );
+        $this->app->bind(
+            \App\Repositories\Message\MessageRepositoryInterface::class,
+            \App\Repositories\Message\MessageRepository::class
+        );
+        $this->app->bind(
+            \App\Repositories\Conversation\ConversationRepositoryInterface::class,
+            \App\Repositories\Conversation\ConversationRepository::class
+        );
     }
 
     /**

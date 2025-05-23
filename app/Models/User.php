@@ -62,4 +62,15 @@ class User extends Authenticatable
 
         return $array;
     }
+
+    public function conversations()
+    {
+        return $this->belongsToMany(Conversation::class, 'user_conversation', 'user_id', 'conversation_id')
+            ->withPivot('user_id');
+    }
+
+    public function mesasges()
+    {
+        return $this->hasMany(Message::class, 'user_id', 'id');
+    }
 }
