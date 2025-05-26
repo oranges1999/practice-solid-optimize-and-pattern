@@ -6,5 +6,5 @@ interface ConversationRepositoryInterface
 {
     public function checkConversationExist($participantIds);
     public function createConversation($usersArray);
-    public function getBasicInformation($joinedConversationId, $user);
+    public function getBasicInformation($joinedConversationId, $user, $filter = null);
 }

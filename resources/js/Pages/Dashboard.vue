@@ -101,9 +101,17 @@ const chooseParticipant = (user) => {
   }
 };
 
-const chooseConversation = (id) => {
+const markAsRead = async (conversationId) => {
+  if(conversationId){
+    await axios.get(route('api.chats.message.mark-as-read', {conversation: conversationId}))
+  }
+}
+
+const chooseConversation = async (conversationId, id) => {
+  markAsRead(conversationId)
   choseConversation.value = id;
   chatParticipant.value = null;
+  conversations.value[id].unread_messages_count = 0
 };
 
 const checkOnlineStatus = (id) => onlineUsers.value.some(user => user.id === id);
@@ -128,6 +136,8 @@ const sendMessage = async () => {
     if (chatParticipant.value) {
       formData.append('user_id', chatParticipant.value.id);
     } else {
+      conversations.value[conversations.value.findIndex((c) => c.id == currentConversation.value.id)].unread_messages_count = 0
+      markAsRead(currentConversation.value.id)
       formData.append('conversation_id', currentConversation.value.id);
     }
   }
@@ -138,6 +148,8 @@ const sendMessage = async () => {
 
     if (response.data.message) {
       currentConversation.value.messages.push(response.data.message);
+      let oldConversation = conversations.value.filter((c) => c.id == response.data.message.conversation_id)
+      oldConversation[0].messages.push(response.data.message)
     }
 
     if (response.data.conversation) {
@@ -210,9 +222,19 @@ watch(() => currentConversation.value, (newVal, oldVal) => {
 });
 
 onMounted(() => {
-  Echo.private(`App.Models.User.${user.id}`).listen('UpdateChatRoom', (e) => {
-    conversations.value.unshift(e.conversation);
-  });
+  Echo.private(`App.Models.User.${user.id}`)
+    .listen('UpdateChatRoom', (e) => {
+      console.log(e.conversation)
+      let index = conversations.value.findIndex((c) => c.id == e.conversation.id)
+      if(index >= 0){
+        conversations.value[index] = e.conversation
+      } else {
+        conversations.value.unshift(e.conversation);
+      }
+      if(currentConversation.value){
+        choseConversation.value = conversations.value.findIndex((c) => c.id == currentConversation.value.id)
+      }
+    });
 });
 </script>
 
@@ -248,8 +270,8 @@ onMounted(() => {
                         </div>
                         <div class="min-h-[280px]" :class="baseContainerClass">
                             <div v-for="conversation, index in conversations" class="">
-                                <div :class="choseConversation == index ? 'bg-[white] rounded-[8px]' : ''" class="flex py-[5px] cursor-pointer" @click="chooseConversation(index)">
-                                    <div v-if="conversation.users.length == 1" class="w-[40px] h-[40px] relative">
+                                <div :class="choseConversation == index ? 'bg-[white] rounded-[8px]' : ''" class="flex py-[5px] cursor-pointer" @click="chooseConversation(conversation.id, index)">
+                                  <div v-if="conversation.users.length == 1" class="w-[40px] h-[40px] relative">
                                         <img :src="conversation.users[0].avatar" alt="" class="rounded-full">
                                         <img v-if="checkOnlineStatus(conversation.users[0].id)" src="/svgs/online_dot.svg" alt="" class="absolute top-0 right-0 w-[10px]">
                                     </div>
@@ -263,7 +285,9 @@ onMounted(() => {
                                         </div>
                                         <div class="flex">
                                             <p v-if="conversation.messages[conversation.messages.length-1].user_id == user.id">You: </p>
-                                            <p>{{ conversation.messages[conversation.messages.length-1].content }}</p>
+                                            <p :class="conversation.unread_messages_count > 0 ? 'font-bold italic' : 'font-regular'">
+                                                {{ conversation.messages[conversation.messages.length-1].content }}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -314,7 +338,7 @@ onMounted(() => {
                             </el-scrollbar>
                         </div>
                         <div :class="baseContainerClass" class="h-[70px] flex ">
-                            <input type="text" class="h-full rounded-[4px] input-width" v-model="content" @keyup.enter="sendMessage" @keydown="whisperTyping" @keyup="whisperEndTyping">
+                            <input type="text" class="h-full rounded-[4px] input-width" v-model="content" @keyup.enter="sendMessage(id)" @keydown="whisperTyping" @keyup="whisperEndTyping">
                             <button class="flex items-center justify-center h-full aspect-square" @click="sendMessage">
                                 <img src="/svgs/send.svg" alt="" class="w-[50%]">
                             </button>

@@ -35,4 +35,9 @@ class ChatController extends Controller
             'messages'
         ]);
     }
+
+    public function markAsRead(Conversation $conversation)
+    {
+        return $this->service->markRead($conversation, $this->user);
+    }
 }

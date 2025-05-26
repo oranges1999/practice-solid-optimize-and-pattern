@@ -50,33 +50,79 @@ class ChatService
                     'user_id' => $user->id,
                     'content' => $data['content']
                 ]);
+            DB::commit();
             if ($type == ReturnTypeEnum::MESSAGE->value) {
                 $returnData = ['type' => $type,'message' => $message];
+            $otherMember = DB::table('user_conversation')
+                    ->where('user_id', '!=', $user->id)
+                    ->where('conversation_id', $conversationId)
+                    ->get();
+                foreach($otherMember as $member){
+                    $oldConversation = Conversation::where('id', $conversationId)
+                        ->withCount(['messages as unread_messages_count' => function ($query) use ($member) {
+                            $query->where('read', false)
+                                ->where('user_id', '!=', $member->user_id);
+                        }])
+                        ->with([
+                            'users' => function ($q) use ($user) {
+                                $q->where('users.id', $user->id);
+                            },
+                            'messages' => function ($q) {
+                                $q->orderBy('created_at', 'desc')->limit(1);
+                            }
+                        ])
+                        ->first();
+                    broadcast(new UpdateChatRoom($member->user_id, $oldConversation))->toOthers();
+                }
                 broadcast(new UpdateMessages($message))->toOthers();
             } else {
-                $senderData = [
-                    'users' => function ($q) use ($user) {
-                        $q->where('users.id', '!=', $user->id);
+                $targetData = [
+                    'users' => function ($q) use ($data) {
+                        $q->where('users.id', $data['user_id']);
                     },
                     'messages'
                 ];
-                $targetData = [
-                    'users' => function ($q) use ($data) {
-                        $q->where('users.id', '!=', $data['user_id']);
+                $senderData = [
+                    'users' => function ($q) use ($user) {
+                        $q->where('users.id', $user->id);
                     },
                     'messages'
                 ];
                 $returnData = [
                     'type' => $type,
-                    'conversation' => $conversation->load($senderData)
+                    'conversation' => $this->getConversationData($targetData, $conversation->id, $user->id)
                     ];
-                broadcast(new UpdateChatRoom($data['user_id'], $conversation->load($targetData)))->toOthers();
+                broadcast(
+                    new UpdateChatRoom(
+                        $data['user_id'],
+                        $this->getConversationData($senderData,  $conversation->id, $data['user_id'])
+                    )
+                )
+                ->toOthers();
             }
-            DB::commit();
             return $returnData;
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::error($th);
         }
+    }
+
+    public function markRead(Conversation $conversation, $currentUser)
+    {
+        return Message::where('conversation_id', $conversation->id)
+            ->where('user_id', '!=', $currentUser->id)
+            ->where('read', false)
+            ->update(['read' => true]);
+    }
+
+    private function getConversationData($relation, $conversationId, $userId)
+    {
+        return Conversation::where('id', $conversationId)
+            ->withCount(['messages as unread_messages_count' => function ($query) use ($userId) {
+                $query->where('read', false)
+                    ->where('user_id', '!=', $userId);
+            }])
+            ->with($relation)
+            ->first();
     }
 }

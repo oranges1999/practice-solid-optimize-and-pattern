@@ -12,7 +12,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class UpdateChatRoom implements ShouldBroadcastNow
+class UpdateChatRoom implements ShouldBroadcast
 {
     use Dispatchable;
     use InteractsWithSockets;
@@ -27,12 +27,12 @@ class UpdateChatRoom implements ShouldBroadcastNow
     public function __construct($userId, $conversation)
     {
         $this->userId = $userId;
-        $this->conversation = $conversation;
+        $this->conversation = json_encode($conversation);
     }
 
     public function broadcastWith()
     {
-        return ['conversation' => $this->conversation];
+        return ['conversation' => json_decode($this->conversation)];
     }
 
     /**

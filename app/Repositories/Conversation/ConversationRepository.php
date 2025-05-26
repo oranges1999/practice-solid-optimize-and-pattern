@@ -24,17 +24,23 @@ class ConversationRepository implements ConversationRepositoryInterface
         return $conversation;
     }
 
-    public function getBasicInformation($joinedConversationId, $user)
+    public function getBasicInformation($joinedConversationId, $user, $filter = null)
     {
+        $relation = $filter ?
+            $filter :
+            ['users' => function ($query) use ($user) {
+                $query->where('users.id', '!=', $user->id);
+            } ,
+            'messages' => function ($query) {
+                $query->orderBy('created_at', 'desc')->limit(1);
+            }];
         return Conversation::whereIn('id', $joinedConversationId)
-            ->with([
-                'users' => function ($query) use ($user) {
-                    $query->where('users.id', '!=', $user->id);
-                } ,
-                'messages' => function ($query) {
-                    $query->orderBy('created_at', 'desc')->limit(1);
-                }
-            ])
+            ->withCount(['messages as unread_messages_count' => function ($query) use ($user) {
+                $query->where('read', false)
+                    ->where('user_id', '!=', $user->id);
+            }])
+            ->with($relation)
+            ->orderBy('created_at', 'desc')
             ->get();
     }
 }

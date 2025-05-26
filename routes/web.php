@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\SendNotiWhenLeaveController;
 use App\Http\Controllers\Api\UserController as ApiUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Models\Conversation;
+use App\Models\Message;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -24,6 +26,18 @@ Route::get(
         );
     }
 );
+
+Route::get('/delete-all-conversation', function() {
+    $conversations = Conversation::all();
+    foreach ($conversations as $key => $conversation) {
+        $conversation->users()->detach();
+        $conversation->delete();
+    }
+    $messages = Message::all();
+    foreach ($messages as $key => $message) {
+        $message->delete();
+    }
+});
 
 Route::get('/dashboard', [ChatController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -70,11 +84,12 @@ Route::prefix('api')->as('api.')->middleware('auth')->group(function () {
         });
 
     Route::prefix('/chats')
-        ->as('chats.')
+    ->as('chats.')
         ->controller(ApiChatController::class)
         ->group(function () {
             Route::post('/message-store', 'storeMessage')->name('message.store');
             Route::get('message-get/{conversation}', 'getConversation')->name('message.get');
+            Route::get('mark-as-read/{conversation}', 'markAsRead')->name('message.mark-as-read');
         });
 });
 
