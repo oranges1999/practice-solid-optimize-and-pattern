@@ -125,66 +125,66 @@ services:
             - 'PMA_PASSWORD=${DB_PASSWORD}'
         networks:
             - sail
-    sonarqube:
-        image: 'sonarqube:latest'
-        healthcheck:
-            test:
-                - CMD
-                - curl
-                - '-f'
-                - 'http://localhost:9000'
-            interval: 10s
-            timeout: 5s
-            retries: 10
-        depends_on:
-            db:
-                condition: service_healthy
-        environment:
-            SONAR_JDBC_URL: 'jdbc:postgresql://db:5432/sonar'
-            SONAR_JDBC_USERNAME: sonar
-            SONAR_JDBC_PASSWORD: sonar
-        volumes:
-            - 'sonarqube_data:/opt/sonarqube/data'
-            - 'sonarqube_extensions:/opt/sonarqube/extensions'
-            - 'sonarqube_logs:/opt/sonarqube/logs'
-            - 'sonarqube_temp:/opt/sonarqube/temp'
-        ports:
-            - '9090:9000'
-        networks:
-            - sail
-    sonar-scanner:
-        image: sonarsource/sonar-scanner-cli
-        environment:
-            SONAR_TOKEN: '${SONAR_TOKEN}'
-            SONAR_HOST_URL: '${SONAR_HOST_URL}'
-            SONAR_SCANNER_OPTS: "-Dsonar.projectKey=${SONAR_PROJECT_KEY}\n"
-        networks:
-            - sail
-        depends_on:
-            sonarqube:
-                condition: service_healthy
-        volumes:
-            - './:/usr/src'
-    db:
-        image: 'postgres:latest'
-        healthcheck:
-            test:
-                - CMD-SHELL
-                - pg_isready
-            interval: 10s
-            timeout: 5s
-            retries: 5
-        hostname: postgresql
-        environment:
-            PGUSER: sonar
-            POSTGRES_USER: sonar
-            POSTGRES_PASSWORD: sonar
-            POSTGRES_DB: sonar
-        volumes:
-            - 'postgresql:/var/lib/postgresql'
-            - 'postgresql_data:/var/lib/postgresql/data'
-        networks:
-            - sail
+    # sonarqube:
+    #     image: 'sonarqube:latest'
+    #     healthcheck:
+    #         test:
+    #             - CMD
+    #             - curl
+    #             - '-f'
+    #             - 'http://localhost:9000'
+    #         interval: 10s
+    #         timeout: 5s
+    #         retries: 10
+    #     depends_on:
+    #         db:
+    #             condition: service_healthy
+    #     environment:
+    #         SONAR_JDBC_URL: 'jdbc:postgresql://db:5432/sonar'
+    #         SONAR_JDBC_USERNAME: sonar
+    #         SONAR_JDBC_PASSWORD: sonar
+    #     volumes:
+    #         - 'sonarqube_data:/opt/sonarqube/data'
+    #         - 'sonarqube_extensions:/opt/sonarqube/extensions'
+    #         - 'sonarqube_logs:/opt/sonarqube/logs'
+    #         - 'sonarqube_temp:/opt/sonarqube/temp'
+    #     ports:
+    #         - '9090:9000'
+    #     networks:
+    #         - sail
+    # sonar-scanner:
+    #     image: sonarsource/sonar-scanner-cli
+    #     environment:
+    #         SONAR_TOKEN: '${SONAR_TOKEN}'
+    #         SONAR_HOST_URL: '${SONAR_HOST_URL}'
+    #         SONAR_SCANNER_OPTS: "-Dsonar.projectKey=${SONAR_PROJECT_KEY}\n"
+    #     networks:
+    #         - sail
+    #     depends_on:
+    #         sonarqube:
+    #             condition: service_healthy
+    #     volumes:
+    #         - './:/usr/src'
+    # db:
+    #     image: 'postgres:latest'
+    #     healthcheck:
+    #         test:
+    #             - CMD-SHELL
+    #             - pg_isready
+    #         interval: 10s
+    #         timeout: 5s
+    #         retries: 5
+    #     hostname: postgresql
+    #     environment:
+    #         PGUSER: sonar
+    #         POSTGRES_USER: sonar
+    #         POSTGRES_PASSWORD: sonar
+    #         POSTGRES_DB: sonar
+    #     volumes:
+    #         - 'postgresql:/var/lib/postgresql'
+    #         - 'postgresql_data:/var/lib/postgresql/data'
+    #     networks:
+    #         - sail
 networks:
     sail:
         driver: bridge

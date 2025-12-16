@@ -3,7 +3,7 @@ import onlineUpdateTypes from '@/Consts/OnlineUpdateTypes';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref, watch, onBeforeUnmount } from 'vue';
 import { debounce } from 'lodash';
 
 // props
@@ -26,6 +26,7 @@ const content = ref('');
 const channel = ref();
 const sendersArray = ref([]);
 const isTyping = ref(false);
+const searchSectionRef = ref();
 
 // style classes
 const baseContainerClass = 'bg-[#f3f4f6] rounded-[8px] p-[10px]';
@@ -57,6 +58,23 @@ const calculateCondition = (message, prevMessage) => {
 
 const deleteIdFromSenderArrays = (array, targetId) => array.filter(id => id !== targetId);
 
+const revealSearchSection = () => {
+  searchSectionRef.value.classList.remove('invisible')
+  searchSectionRef.value.classList.remove('opacity-0')
+}
+
+const hideSearchSection = () => {
+  searchSectionRef.value.classList.add('invisible')
+  searchSectionRef.value.classList.add('opacity-0')
+}
+
+const toggleSearchSection = () => {
+  if(searchSectionRef.value.classList.contains('invisible')){
+    revealSearchSection()
+  } else {
+    hideSearchSection()
+  }
+}
 // user & conversation handlers
 const updateOnlineUsers = ({ user: userObj, type }) => {
   const userId = userObj.id;
@@ -222,40 +240,60 @@ watch(() => currentConversation.value, (newVal, oldVal) => {
 });
 
 onMounted(() => {
-  Echo.private(`App.Models.User.${user.id}`)
-    .listen('UpdateChatRoom', (e) => {
-      console.log(e.conversation)
-      let index = conversations.value.findIndex((c) => c.id == e.conversation.id)
-      if(index >= 0){
-        conversations.value[index] = e.conversation
-      } else {
-        conversations.value.unshift(e.conversation);
-      }
-      if(currentConversation.value){
-        choseConversation.value = conversations.value.findIndex((c) => c.id == currentConversation.value.id)
-      }
-    });
+  Echo.private(`App.Models.User.${user.id}`).listen('UpdateChatRoom', (e) => {
+    console.log(e.conversation)
+    let index = conversations.value.findIndex((c) => c.id == e.conversation.id)
+    if(index >= 0){
+      conversations.value[index] = e.conversation
+    } else {
+      conversations.value.unshift(e.conversation);
+    }
+    if(currentConversation.value){
+      choseConversation.value = conversations.value.findIndex((c) => c.id == currentConversation.value.id)
+    }
+  });
+  
+  searchSectionRef.value.addEventListener('click', (e) => {
+    if(e.target == e.currentTarget){
+      hideSearchSection()
+    }
+  })
 });
+
+onBeforeUnmount(() => {
+  // I'm lazy as f*ck, so just pretend all the cleanup (event listeners, gsap animation, etc, ...) is here
+})
+onUnmounted(() => {
+  // Or maybe here, Idk
+  // Just pick one
+})
 </script>
 
 <template>
+    <div ref="searchSectionRef" class="absolute flex justify-center items-center h-full w-full bg-[#00000070] z-[999] opacity-0 invisible">
+      <div class="w-[500px] h-[600px] flex flex-col gap-4 bg-white rounded-lg shadow-xl p-4">
+        <el-input v-model="input" size="large" placeholder="Please input" />
+        <div class="h-full bg-[#f3f4f6] rounded-lg p-4">
+          
+        </div>
+        <div class="flex justify-center">
+          <el-button type="primary" round>Start conversation</el-button>
+        </div>
+      </div>
+    </div>  
     <Head title="Dashboard" />
-
     <AuthenticatedLayout @update-online-user="updateOnlineUsers" @current-online-users="getCurrentOnlineUser">
         <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800"
-            >
-                Dashboard
-            </h2>
+          <h2 class="text-xl font-semibold leading-tight text-gray-800">
+              Dashboard
+          </h2>
         </template>
-
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="bg-white p-[20px] rounded-[16px] shadow grid grid-cols-4 gap-[20px]">
                     <div class="">
                         <div class="mb-[20px] h-[90px] w-full flex " :class="baseContainerClass">
-                            <div :class="baseOnlineUsers">
+                            <div :class="baseOnlineUsers" @click="toggleSearchSection" class="cursor-pointer">
                                 <img src="/svgs/plus_circle_white.svg" class="w-[50px]" alt="">
                                 <p class="text-[12px] truncate w-full">Add</p>
                             </div>

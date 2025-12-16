@@ -11,7 +11,6 @@ use App\Repositories\Conversation\ConversationRepositoryInterface;
 use App\Repositories\Message\MessageRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use PhpParser\Node\Stmt\Return_;
 
 class ChatService
 {
@@ -53,10 +52,10 @@ class ChatService
             DB::commit();
             if ($type == ReturnTypeEnum::MESSAGE->value) {
                 $returnData = ['type' => $type,'message' => $message];
-            $otherMember = DB::table('user_conversation')
-                    ->where('user_id', '!=', $user->id)
-                    ->where('conversation_id', $conversationId)
-                    ->get();
+                $otherMember = DB::table('user_conversation')
+                        ->where('user_id', '!=', $user->id)
+                        ->where('conversation_id', $conversationId)
+                        ->get();
                 foreach($otherMember as $member){
                     $oldConversation = Conversation::where('id', $conversationId)
                         ->withCount(['messages as unread_messages_count' => function ($query) use ($member) {
