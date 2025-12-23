@@ -1,5 +1,5 @@
 <h3 align="center">
-#Practicing Project
+Chat app
 </h3>
 
 ## Purpose of this project
